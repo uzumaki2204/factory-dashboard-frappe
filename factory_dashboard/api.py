@@ -77,6 +77,43 @@ def _line_summary(line, production_date, mode):
     }
 
 
+def _panel_lines(group, line, fallback):
+    if group:
+        return [row.line for row in frappe.get_all(
+            "Line Group Assignment", fields=["line"],
+            filters={"line_group": group, "is_active": 1}, limit_page_length=200,
+        )]
+    return [line or fallback]
+
+
+def _panel_summary(lines, label, production_date, mode):
+    entries = [_line_summary(line, production_date, mode) for line in lines]
+    slots = {}
+    for entry in entries:
+        for slot, quantity in entry["time_slots"].items():
+            slots[slot] = slots.get(slot, 0) + quantity
+    qc_total = sum(entry["qc_total_quantity"] for entry in entries)
+    defects = sum(entry["defect_quantity"] for entry in entries)
+    return {
+        "line": lines[0] if len(lines) == 1 else None,
+        "line_name": label or (entries[0]["line_name"] if len(entries) == 1 else ""),
+        "source_lines": lines,
+        "production_date": production_date,
+        "report_count": sum(entry["report_count"] for entry in entries),
+        "finished_quantity": sum(entry["finished_quantity"] for entry in entries),
+        "daily_target_quantity": sum(entry["daily_target_quantity"] for entry in entries),
+        "worker_count": sum(entry["worker_count"] for entry in entries),
+        "working_hours": sum(entry["working_hours"] for entry in entries),
+        "ironing_delivery_quantity": sum(entry["ironing_delivery_quantity"] for entry in entries),
+        "qc_total_quantity": qc_total, "defect_quantity": defects,
+        "defect_events": sum(entry["defect_events"] for entry in entries),
+        "defect_rate_percent": round(100 * defects / qc_total, 2) if mode == "qc_input" and qc_total else (0 if mode == "qc_input" else None),
+        "has_defect_rate": mode == "qc_input",
+        "defect_rate_unavailable_reason": None if mode == "qc_input" else message("error.defect_source"),
+        "time_slots": slots,
+    }
+
+
 @frappe.whitelist(allow_guest=True, methods=["GET"])
 def translations(lang="vi"):
     values = catalog()
@@ -115,11 +152,22 @@ def summary(device_id=None, production_date=None, lines=None):
 def display(device_id=None, production_date=None):
     current = profile(device_id)
     config = current["config"]
-    selected = [config.get("primary_line") or current["scope_lines"][0]]
-    if config.get("display_mode") == "dual" and config.get("secondary_line"):
-        selected.append(config["secondary_line"])
-    if any(line not in current["scope_lines"] for line in selected):
+    fallback = current["scope_lines"][0]
+    if config.get("display_mode") == "dual":
+        panels = [
+            (config.get("left_group"), config.get("left_line") or config.get("primary_line")),
+            (config.get("right_group"), config.get("right_line") or config.get("secondary_line")),
+        ]
+    else:
+        panels = [(config.get("single_group"), config.get("primary_line"))]
+    selected = [_panel_lines(group, line, fallback) for group, line in panels]
+    if any(not lines or any(line not in current["scope_lines"] for line in lines) for lines in selected):
         _fail("error.scope", frappe.PermissionError)
-    result = summary(device_id, production_date, selected)
-    result["display_mode"] = config.get("display_mode") or "single"
-    return result
+    day = _date(production_date)
+    mode = frappe.db.get_value("Productivity Dashboard Settings", "GLOBAL", "defect_rate_mode") or "qc_input"
+    rows = []
+    for (group, _), lines in zip(panels, selected):
+        label = frappe.db.get_value("Line Group", group, "group_name") if group else None
+        rows.append(_panel_summary(lines, label, day, mode))
+    return {"production_date": day, "defect_rate_mode": mode,
+            "display_mode": config.get("display_mode") or "single", "lines": rows}

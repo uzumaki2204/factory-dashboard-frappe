@@ -11,6 +11,6 @@ class ProductivityDashboardDeviceConfig(Document):
         for line in (self.primary_line, self.secondary_line, self.left_line, self.right_line):
             if line and frappe.db.get_value("Production Line", line, "factory") != device.factory:
                 frappe.throw(message("error.scope"))
-        for group in (self.left_group, self.right_group):
+        for group in (self.single_group, self.left_group, self.right_group):
             if group and frappe.db.get_value("Line Group", group, "factory") != device.factory:
                 frappe.throw(message("error.scope"))
