@@ -1,0 +1,20 @@
+{
+  "doctype": "DocType", "name": "Productivity Dashboard Device Config", "module": "Factory Dashboard",
+  "custom": 0, "autoname": "field:device", "allow_import": 1, "track_changes": 1,
+  "fields": [
+    {"fieldname": "device", "label": "Factory Device", "fieldtype": "Link", "options": "Factory Device", "reqd": 1, "unique": 1, "in_list_view": 1},
+    {"fieldname": "display_mode", "label": "Display Mode", "fieldtype": "Select", "options": "single\ndual", "reqd": 1, "default": "single"},
+    {"fieldname": "primary_line", "label": "Primary Line", "fieldtype": "Link", "options": "Production Line"},
+    {"fieldname": "secondary_line", "label": "Secondary Line", "fieldtype": "Link", "options": "Production Line"},
+    {"fieldname": "left_line", "label": "Left Line", "fieldtype": "Link", "options": "Production Line"},
+    {"fieldname": "right_line", "label": "Right Line", "fieldtype": "Link", "options": "Production Line"},
+    {"fieldname": "left_group", "label": "Left Group", "fieldtype": "Link", "options": "Line Group"},
+    {"fieldname": "right_group", "label": "Right Group", "fieldtype": "Link", "options": "Line Group"},
+    {"fieldname": "updated_at", "label": "Updated At", "fieldtype": "Datetime", "read_only": 1}
+  ],
+  "permissions": [
+    {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "report": 1, "export": 1, "import": 1},
+    {"role": "Productivity Dashboard Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "report": 1, "export": 1, "import": 1},
+    {"role": "Productivity Viewer", "read": 1, "report": 1, "export": 1}
+  ]
+}

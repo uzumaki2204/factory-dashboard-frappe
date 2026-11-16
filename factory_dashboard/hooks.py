@@ -1,0 +1,10 @@
+app_name = "factory_dashboard"
+app_title = "Factory Dashboard"
+app_publisher = "Onichan"
+app_description = "Productivity dashboard in Frappe Desk"
+app_email = ""
+app_license = "Proprietary"
+required_apps = ["factory_management", "factory_productivity"]
+before_install = "factory_dashboard.install.before_install"
+after_install = "factory_dashboard.install.after_migrate"
+after_migrate = "factory_dashboard.install.after_migrate"

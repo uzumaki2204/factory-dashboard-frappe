@@ -1,0 +1,14 @@
+{
+  "doctype": "DocType", "name": "Productivity Dashboard Settings", "module": "Factory Dashboard",
+  "custom": 0, "autoname": "field:settings_key", "allow_import": 1, "track_changes": 1,
+  "fields": [
+    {"fieldname": "settings_key", "label": "Settings Key", "fieldtype": "Data", "reqd": 1, "unique": 1, "read_only": 1, "default": "GLOBAL"},
+    {"fieldname": "defect_rate_mode", "label": "Defect Rate Mode", "fieldtype": "Select", "options": "qc_input\nqcbrother_input\nbrother", "reqd": 1, "default": "qc_input"},
+    {"fieldname": "refresh_seconds", "label": "Refresh Seconds", "fieldtype": "Int", "default": "60", "non_negative": 1}
+  ],
+  "permissions": [
+    {"role": "System Manager", "read": 1, "write": 1, "create": 1, "report": 1, "export": 1, "import": 1},
+    {"role": "Productivity Dashboard Manager", "read": 1, "write": 1, "create": 1, "report": 1, "export": 1, "import": 1},
+    {"role": "Productivity Viewer", "read": 1, "report": 1, "export": 1}
+  ]
+}

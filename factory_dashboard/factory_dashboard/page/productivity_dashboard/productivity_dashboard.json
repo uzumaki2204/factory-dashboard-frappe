@@ -1,0 +1,5 @@
+{
+  "doctype": "Page", "name": "productivity-dashboard", "page_name": "productivity-dashboard",
+  "module": "Factory Dashboard", "title": "Productivity Dashboard", "standard": "Yes",
+  "roles": [{"role": "System Manager"}, {"role": "Productivity Dashboard Manager"}, {"role": "Productivity Viewer"}]
+}
