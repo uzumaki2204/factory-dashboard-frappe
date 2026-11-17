@@ -1,5 +1,5 @@
 frappe.pages['productivity-dashboard'].on_page_load = async function (wrapper) {
-    const catalog = await frappe.call({ method: 'factory_dashboard.api.translations', args: { lang: frappe.boot.lang || 'vi' } });
+    const catalog = await frappe.call({ method: 'factory_dashboard.api.translations', type: 'GET', args: { lang: frappe.boot.lang || 'vi' } });
     const texts = catalog.message || {};
     const t = key => texts[key] || '';
     const page = frappe.ui.make_app_page({ parent: wrapper, title: t('ui.title'), single_column: true });
@@ -21,7 +21,7 @@ frappe.pages['productivity-dashboard'].on_page_load = async function (wrapper) {
         const device_id = device.get_value();
         if (!device_id) return;
         try {
-            const response = await frappe.call({ method: 'factory_dashboard.api.display', args: { device_id, production_date: page.fields_dict.production_date.get_value() } });
+            const response = await frappe.call({ method: 'factory_dashboard.api.display', type: 'GET', args: { device_id, production_date: page.fields_dict.production_date.get_value() } });
             output.empty();
             for (const row of response.message.lines) {
                 const card = $('<div class="col-md-6 mb-3"><div class="frappe-card p-4"><h3></h3><div class="row"></div></div></div>');
