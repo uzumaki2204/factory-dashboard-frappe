@@ -1,4 +1,4 @@
-﻿"""Device-scoped dashboard APIs for productivity and QC/UQQC projections."""
+"""Device-scoped dashboard APIs for productivity and QC/UQQC projections."""
 from datetime import date
 
 import frappe
