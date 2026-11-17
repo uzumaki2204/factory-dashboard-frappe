@@ -3,7 +3,7 @@
   "custom": 0, "autoname": "field:settings_key", "allow_import": 1, "track_changes": 1,
   "fields": [
     {"fieldname": "settings_key", "label": "Settings Key", "fieldtype": "Data", "reqd": 1, "unique": 1, "read_only": 1, "default": "GLOBAL"},
-    {"fieldname": "defect_rate_mode", "label": "Defect Rate Mode", "fieldtype": "Select", "options": "qc_input\nqcbrother_input\nbrother", "reqd": 1, "default": "qc_input"},
+    {"fieldname": "defect_rate_mode", "label": "Defect Rate Mode", "fieldtype": "Select", "options": "qc_input\nuqqc_input", "reqd": 1, "default": "qc_input"},
     {"fieldname": "refresh_seconds", "label": "Refresh Seconds", "fieldtype": "Int", "default": "60", "non_negative": 1}
   ],
   "permissions": [

@@ -2,6 +2,8 @@ import json
 from functools import lru_cache
 from pathlib import Path
 
+import frappe
+
 
 @lru_cache(maxsize=1)
 def catalog():

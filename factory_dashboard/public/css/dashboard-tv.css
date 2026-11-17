@@ -1,0 +1,31 @@
+.dashboard-tv{min-height:100vh;padding:24px 32px;background:var(--bg-color,#f5f7fa);color:var(--text-color,#242a35);font-size:18px}
+.dashboard-tv-header,.dashboard-tv-brand,.dashboard-tv-actions,.dashboard-tv-panel-header{display:flex;align-items:center;gap:16px}
+.dashboard-tv-header,.dashboard-tv-panel-header{justify-content:space-between}
+.dashboard-tv-header{margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border-color,#dce0e5)}
+.dashboard-tv-brand h1{font-size:1.55rem;font-weight:700;margin:0}
+.dashboard-tv-actions{flex-wrap:wrap;justify-content:flex-end}
+.dashboard-tv-panels{display:grid;grid-template-columns:minmax(0,1fr);gap:20px}
+.dashboard-tv-panels-dual{grid-template-columns:repeat(2,minmax(0,1fr))}
+.dashboard-tv-panel{padding:24px;border:1px solid var(--border-color,#dce0e5);border-radius:12px;background:var(--card-bg,#fff)}
+.dashboard-tv-panel h2{margin:0;font-size:1.6rem;font-weight:700}
+.dashboard-tv-product{font-size:1.35rem;font-weight:700;color:var(--primary,#2764ba)}
+.dashboard-tv-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:22px 0}
+.dashboard-tv-metric{padding:16px;border-radius:9px;background:var(--control-bg,#f3f5f7);min-width:0}
+.dashboard-tv-metric-label{display:block;color:var(--text-muted,#6b7280);font-size:.85em}
+.dashboard-tv-metric-value{display:block;font-size:clamp(1.6rem,3vw,3rem);line-height:1.2;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.dashboard-tv-meta{display:flex;flex-wrap:wrap;gap:10px 24px;margin-bottom:18px;color:var(--text-muted,#6b7280)}
+.dashboard-tv-note{padding:10px 14px;border-radius:6px;background:var(--control-bg,#f3f5f7)}
+.dashboard-tv-slots{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.dashboard-tv-slots th,.dashboard-tv-slots td{padding:10px 12px;border-bottom:1px solid var(--border-color,#dce0e5)}
+.dashboard-tv-slots th:first-child,.dashboard-tv-slots td:first-child{text-align:left}
+.dashboard-tv-slots th:not(:first-child),.dashboard-tv-slots td:not(:first-child){text-align:right}
+.dashboard-tv-line-details{display:grid;gap:8px;margin-bottom:18px}
+.dashboard-tv-line-detail{display:flex;flex-wrap:wrap;gap:8px 22px;padding:12px;background:var(--control-bg,#f3f5f7);border-radius:6px}
+.dashboard-tv-status,.dashboard-tv-footer{color:var(--text-muted,#6b7280);font-size:.85em}
+.dashboard-tv-status{min-height:1.7em;margin-bottom:8px}
+.dashboard-tv-footer{margin-top:18px;text-align:right}
+.dashboard-tv-device{max-width:520px;margin:8vh auto 24px;padding:24px}
+.dashboard-tv-device-row{display:flex;gap:10px;margin-top:12px}
+.dashboard-tv-device-row input{flex:1}
+@media(max-width:1100px){.dashboard-tv-panels-dual{grid-template-columns:1fr}.dashboard-tv-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.dashboard-tv{padding:14px;font-size:15px}.dashboard-tv-header{align-items:flex-start;flex-direction:column}.dashboard-tv-actions{justify-content:flex-start}.dashboard-tv-panel{padding:16px}.dashboard-tv-metrics{gap:8px}.dashboard-tv-metric{padding:12px}.dashboard-tv-device-row{flex-direction:column}}

@@ -7,3 +7,5 @@ class ProductivityDashboardSettings(Document):
     def validate(self):
         if self.settings_key != "GLOBAL":
             frappe.throw(message("error.invalid_input"))
+        if self.defect_rate_mode not in ("qc_input", "uqqc_input"):
+            frappe.throw(message("error.invalid_input"))
