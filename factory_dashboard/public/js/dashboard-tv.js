@@ -90,8 +90,7 @@
         const board = element('section', 'dashboard-tv-board');
         const head = element('div', 'dashboard-tv-head');
         const line = element('div', 'dashboard-tv-head-cell');
-        line.append(element('strong', 'dashboard-tv-line-code', row.line_code || row.line_name || row.line || t('ui.no_value')));
-        if (row.line_name && row.line_name !== row.line_code) line.append(element('span', 'dashboard-tv-line-name', row.line_name));
+        line.append(element('strong', 'dashboard-tv-line-code', row.line_name || row.line_code || row.line || t('ui.no_value')));
         const lineMeta = element('div', 'dashboard-tv-fields');
         lineMeta.append(field(t('ui.line_leader'), row.line_leader_name || t('ui.no_value')));
         lineMeta.append(field(t('ui.technical_leader'), row.technical_leader_name || t('ui.no_value')));
