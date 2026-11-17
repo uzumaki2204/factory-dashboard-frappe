@@ -7,7 +7,7 @@
     "error.scope": "Chuyền không thuộc phạm vi thiết bị.",
     "error.permission": "Bạn không có quyền thực hiện thao tác này.",
     "error.defect_source": "Chưa có dữ liệu UQQC trên site này.",
-    "error.config_missing": "Thiết bị chưa có cấu hình Dashboard TV hoặc chưa được gán chuyền.",
+    "error.config_missing": "Thiết bị chưa được gán chuyền để hiển thị Dashboard TV.",
     "ok.saved": "Đã lưu cấu hình.",
     "ui.title": "Dashboard năng suất",
     "ui.app_short_title": "Dashboard",
@@ -51,7 +51,14 @@
     "ui.quality_checked": "Số lượng kiểm tra",
     "ui.no_value": "—",
     "ui.qc_source": "QC",
-    "ui.uqqc_source": "UQQC"
+    "ui.uqqc_source": "UQQC",
+    "ui.plan_start": "Ngày lên chuyền",
+    "ui.plan_end": "Ngày xuất",
+    "ui.plan_quantity": "Kế hoạch",
+    "ui.produced": "Lũy kế sản xuất",
+    "ui.daily_target": "Năng suất mục tiêu/ngày",
+    "ui.current_target": "Mục tiêu hiện tại",
+    "ui.no_slots": "Chưa có khung giờ."
   },
   "en": {
     "error.missing_doctype": "Required DocType is missing: {doctype}.",
@@ -61,7 +68,7 @@
     "error.scope": "Line is outside the device scope.",
     "error.permission": "You cannot perform this action.",
     "error.defect_source": "UQQC data is not available on this site.",
-    "error.config_missing": "This device has no TV dashboard configuration or assigned line.",
+    "error.config_missing": "This device has no assigned line for the TV dashboard.",
     "ok.saved": "Configuration saved.",
     "ui.title": "Productivity dashboard",
     "ui.app_short_title": "Dashboard",
@@ -105,6 +112,13 @@
     "ui.quality_checked": "Checked quantity",
     "ui.no_value": "—",
     "ui.qc_source": "QC",
-    "ui.uqqc_source": "UQQC"
+    "ui.uqqc_source": "UQQC",
+    "ui.plan_start": "Line start date",
+    "ui.plan_end": "Shipment date",
+    "ui.plan_quantity": "Plan",
+    "ui.produced": "Cumulative production",
+    "ui.daily_target": "Daily target",
+    "ui.current_target": "Current target",
+    "ui.no_slots": "No time slots configured."
   }
 }

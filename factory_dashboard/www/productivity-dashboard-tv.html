@@ -4,17 +4,18 @@
 {% block footer %}{% endblock %}
 {% block content %}
 <main class="dashboard-tv" data-lang="{{ lang }}">
-  <header class="dashboard-tv-header">
-    <div class="dashboard-tv-brand"><img src="/assets/factory_dashboard/images/dashboard.svg" width="36" height="36" alt=""><h1>{{ texts['ui.tv_title'] }}</h1></div>
-    <div class="dashboard-tv-actions"><span id="dashboard-date"></span><span id="dashboard-source"></span><button id="fullscreen-button" class="btn btn-default" type="button">{{ texts['ui.fullscreen'] }}</button><button id="refresh-button" class="btn btn-primary" type="button">{{ texts['ui.refresh'] }}</button></div>
-  </header>
-  <form id="dashboard-device-form" class="dashboard-tv-device frappe-card" hidden>
+  <nav class="dashboard-tv-actions" aria-label="{{ texts['ui.tv_title'] }}">
+    <span id="dashboard-date"></span><span id="dashboard-source"></span>
+    <span id="dashboard-status" role="status" aria-live="polite"></span>
+    <span id="dashboard-updated"></span>
+    <button id="fullscreen-button" class="btn btn-default" type="button">{{ texts['ui.fullscreen'] }}</button>
+    <button id="refresh-button" class="btn btn-primary" type="button">{{ texts['ui.refresh'] }}</button>
+  </nav>
+  <form id="dashboard-device-form" class="dashboard-tv-device" hidden>
     <label for="dashboard-device-id">{{ texts['ui.device_prompt'] }}</label>
     <div class="dashboard-tv-device-row"><input id="dashboard-device-id" class="form-control" type="text" autocomplete="off" placeholder="{{ texts['ui.device_placeholder'] }}" required><button class="btn btn-primary" type="submit">{{ texts['ui.open'] }}</button></div>
   </form>
-  <div id="dashboard-status" class="dashboard-tv-status" role="status" aria-live="polite"></div>
   <div id="dashboard-panels" class="dashboard-tv-panels" aria-live="polite"></div>
-  <footer class="dashboard-tv-footer"><span id="dashboard-updated"></span></footer>
 </main>
 <script id="dashboard-texts" type="application/json">{{ texts_json | safe }}</script>
 <script src="/assets/factory_dashboard/js/dashboard-tv.js?v={{ asset_version }}" defer></script>

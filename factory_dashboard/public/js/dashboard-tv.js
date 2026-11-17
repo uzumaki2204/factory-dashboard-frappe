@@ -19,38 +19,61 @@
         return node;
     }
 
-    function metric(label, value, unit = '') {
-        const card = element('div', 'dashboard-tv-metric');
-        card.append(element('span', 'dashboard-tv-metric-label', label));
-        card.append(element('strong', 'dashboard-tv-metric-value', `${value}${unit}`));
-        return card;
+    function displayDate(value) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value || ''))) return t('ui.no_value');
+        const [year, month, day] = value.split('-');
+        return `${day}/${month}/${year}`;
+    }
+
+    function field(label, value) {
+        const row = element('div', 'dashboard-tv-field');
+        row.append(element('span', 'dashboard-tv-field-label', label));
+        row.append(element('strong', 'dashboard-tv-field-value', value));
+        return row;
+    }
+
+    function kpi(label, value, tone, reason) {
+        const cell = element('div', 'dashboard-tv-kpi');
+        cell.append(element('span', 'dashboard-tv-kpi-label', label));
+        const result = element('strong', `dashboard-tv-kpi-value dashboard-tv-kpi-value-${tone}`, value);
+        if (reason) result.title = reason;
+        cell.append(result);
+        return cell;
     }
 
     function lineDetail(row) {
         const detail = element('div', 'dashboard-tv-line-detail');
-        detail.append(element('strong', '', row.line_name || row.line));
-        detail.append(element('span', '', `${t('ui.product')}: ${row.product_code || t('ui.no_value')}`));
+        detail.append(element('strong', '', row.line_code || row.line_name || row.line));
+        detail.append(element('span', '', row.product_code || t('ui.no_value')));
         detail.append(element('span', '', `${t('ui.defects')}: ${number(row.defect_quantity)}`));
         detail.append(element('span', '', `${t('ui.defect_rate')}: ${row.has_defect_rate ? `${number(row.defect_rate_percent)}%` : t('ui.no_value')}`));
         return detail;
     }
 
-    function slotTable(rows) {
-        const table = element('table', 'dashboard-tv-slots');
-        const head = element('thead');
-        const heading = element('tr');
-        [t('ui.time_slot'), t('ui.slot_output'), t('ui.cumulative')].forEach(label => heading.append(element('th', '', label)));
-        head.append(heading);
-        table.append(head);
-        const body = element('tbody');
+    function slotMatrix(rows) {
+        const matrix = element('section', 'dashboard-tv-slots');
+        const heading = element('div', 'dashboard-tv-slot-heading');
+        [t('ui.time_slot'), t('ui.slot_output'), t('ui.cumulative')].forEach(label => heading.append(element('span', '', label)));
+        matrix.append(heading);
+        const body = element('div', 'dashboard-tv-slot-body');
+        if (!rows.length) body.append(element('p', 'dashboard-tv-empty', t('ui.no_slots')));
         rows.forEach(row => {
-            const tr = element('tr');
-            const range = row.start_time && row.end_time ? ` ${row.start_time.slice(0, 5)}–${row.end_time.slice(0, 5)}` : '';
-            [row.label + range, number(row.quantity), number(row.cumulative_quantity)].forEach(value => tr.append(element('td', '', value)));
-            body.append(tr);
+            const item = element('div', `dashboard-tv-slot-row${row.is_current ? ' is-current' : ''}`);
+            const range = row.start_time && row.end_time ? `${row.start_time.slice(0, 5)}–${row.end_time.slice(0, 5)}` : '';
+            const label = row.label && row.start_time && row.label.includes(row.start_time.slice(0, 5))
+                ? row.label : [row.label, range].filter(Boolean).join(' ');
+            item.append(element('strong', 'dashboard-tv-slot-time', label || t('ui.no_value')));
+            item.append(element('strong', 'dashboard-tv-slot-quantity', number(row.quantity)));
+            item.append(element('strong', 'dashboard-tv-slot-cumulative', number(row.cumulative_quantity)));
+            body.append(item);
         });
-        table.append(body);
-        return table;
+        matrix.append(body);
+        return matrix;
+    }
+
+    function updateClock() {
+        const value = new Date().toLocaleString(root.dataset.lang || 'vi');
+        document.querySelectorAll('.dashboard-tv-clock').forEach(node => { node.textContent = value; });
     }
 
     function serverMessage(body) {
@@ -63,34 +86,43 @@
     }
 
     function renderPanel(row) {
-        const section = element('section', 'dashboard-tv-panel frappe-card');
-        const header = element('div', 'dashboard-tv-panel-header');
-        header.append(element('h2', '', row.line_name || row.line || t('ui.line')));
-        if (row.product_code) header.append(element('span', 'dashboard-tv-product', row.product_code));
-        section.append(header);
-        if (!row.report_count) section.append(element('p', 'dashboard-tv-note', t('ui.no_report')));
-        const grid = element('div', 'dashboard-tv-metrics');
-        grid.append(metric(t('ui.output'), number(row.finished_quantity)));
-        grid.append(metric(t('ui.target'), number(row.daily_target_quantity)));
-        grid.append(metric(t('ui.achievement'), number(row.achievement_rate_percent), '%'));
-        grid.append(metric(t('ui.defects'), number(row.defect_quantity)));
-        grid.append(metric(t('ui.quality_checked'), number(row.qc_total_quantity)));
-        grid.append(metric(t('ui.defect_rate'), row.has_defect_rate ? number(row.defect_rate_percent) : t('ui.no_value'), row.has_defect_rate ? '%' : ''));
-        section.append(grid);
-        if (!row.has_defect_rate) section.append(element('p', 'dashboard-tv-note', row.defect_rate_unavailable_reason || t('ui.no_quality_data')));
-        const meta = element('div', 'dashboard-tv-meta');
-        if (row.planned_quantity) meta.append(element('span', '', `${t('ui.plan')}: ${number(row.planned_quantity)}`));
-        if (row.worker_count) meta.append(element('span', '', `${t('ui.worker_count')}: ${number(row.worker_count)}`));
-        if (row.line_leader_name) meta.append(element('span', '', `${t('ui.line_leader')}: ${row.line_leader_name}`));
-        if (row.technical_leader_name) meta.append(element('span', '', `${t('ui.technical_leader')}: ${row.technical_leader_name}`));
-        section.append(meta);
+        const board = element('section', 'dashboard-tv-board');
+        const head = element('div', 'dashboard-tv-head');
+        const line = element('div', 'dashboard-tv-head-cell');
+        line.append(element('strong', 'dashboard-tv-line-code', row.line_code || row.line_name || row.line || t('ui.no_value')));
+        if (row.line_name && row.line_name !== row.line_code) line.append(element('span', 'dashboard-tv-line-name', row.line_name));
+        const lineMeta = element('div', 'dashboard-tv-fields');
+        lineMeta.append(field(t('ui.line_leader'), row.line_leader_name || t('ui.no_value')));
+        lineMeta.append(field(t('ui.technical_leader'), row.technical_leader_name || t('ui.no_value')));
+        lineMeta.append(field(t('ui.worker_count'), number(row.worker_count)));
+        lineMeta.append(element('strong', 'dashboard-tv-clock'));
+        line.append(lineMeta);
+        const plan = element('div', 'dashboard-tv-head-cell');
+        plan.append(element('strong', 'dashboard-tv-product-code', row.product_code || t('ui.no_value')));
+        const planMeta = element('div', 'dashboard-tv-fields');
+        planMeta.append(field(t('ui.plan_start'), displayDate(row.plan_start_date)));
+        planMeta.append(field(t('ui.plan_end'), displayDate(row.plan_shipment_date)));
+        planMeta.append(field(t('ui.plan_quantity'), number(row.planned_quantity)));
+        planMeta.append(field(t('ui.produced'), number(row.finished_quantity)));
+        plan.append(planMeta);
+        head.append(line, plan);
+        board.append(head);
+        const kpis = element('div', 'dashboard-tv-kpis');
+        kpis.append(kpi(t('ui.daily_target'), number(row.daily_target_quantity), 'blue'));
+        kpis.append(kpi(t('ui.defect_rate'), row.has_defect_rate ? `${number(row.defect_rate_percent)}%` : t('ui.no_value'), 'green', row.defect_rate_unavailable_reason));
+        kpis.append(kpi(t('ui.current_target'), number(row.current_target_quantity), 'blue'));
+        kpis.append(kpi(t('ui.achievement'), `${number(row.achievement_rate_percent)}%`, 'green'));
+        board.append(kpis);
+        if (!row.report_count || !row.has_defect_rate) {
+            board.append(element('div', 'dashboard-tv-data-note', !row.report_count ? t('ui.no_report') : row.defect_rate_unavailable_reason || t('ui.no_quality_data')));
+        }
         if (row.mixed_products) {
             const details = element('div', 'dashboard-tv-line-details');
             row.line_details.forEach(detail => details.append(lineDetail(detail)));
-            section.append(details);
+            board.append(details);
         }
-        if (row.time_slots && row.time_slots.length) section.append(slotTable(row.time_slots));
-        return section;
+        board.append(slotMatrix(row.time_slots || []));
+        return board;
     }
 
     async function load() {
@@ -100,6 +132,7 @@
         try {
             const url = new URL('/api/method/factory_dashboard.api.display', window.location.origin);
             url.searchParams.set('device_id', deviceId);
+            url.searchParams.set('lang', root.dataset.lang || 'vi');
             const response = await fetch(url, { credentials: 'same-origin', cache: 'no-store' });
             const body = await response.json();
             if (!response.ok) {
@@ -109,8 +142,9 @@
             const data = body.message;
             if (!data || !Array.isArray(data.lines)) throw new Error(failure);
             panels.replaceChildren(...data.lines.map(renderPanel));
+            updateClock();
             panels.classList.toggle('dashboard-tv-panels-dual', data.display_mode === 'dual');
-            document.getElementById('dashboard-date').textContent = data.production_date || '';
+            document.getElementById('dashboard-date').textContent = displayDate(data.production_date);
             document.getElementById('dashboard-source').textContent = `${t('ui.source')}: ${t(data.defect_rate_mode === 'uqqc_input' ? 'ui.uqqc_source' : 'ui.qc_source')}`;
             document.getElementById('dashboard-updated').textContent = `${t('ui.last_updated')}: ${new Date().toLocaleString(root.dataset.lang || 'vi')}`;
             status.textContent = t('ui.status_online');
@@ -135,6 +169,7 @@
         if (document.fullscreenElement) document.exitFullscreen();
         else document.documentElement.requestFullscreen();
     });
+    setInterval(updateClock, 1000);
     if (deviceId) load();
     else form.hidden = false;
 })();

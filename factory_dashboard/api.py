@@ -60,6 +60,7 @@ def profile(device_id=None):
     config = frappe.db.get_value("Productivity Dashboard Device Config", {"device": device.name}, "name")
     values = frappe.get_doc("Productivity Dashboard Device Config", config).as_dict() if config else {}
     return {"device": device.name, "company": device.company, "factory": device.factory,
+            "home_line": device.line,
             "scope_lines": [line for line in scope_lines(device) if line], "config": values}
 
 
@@ -86,9 +87,10 @@ def summary(device_id=None, production_date=None, lines=None):
 def display(device_id=None, production_date=None):
     current = profile(device_id)
     config = current["config"]
-    if not config or not current["scope_lines"]:
+    if not current["scope_lines"]:
         _fail("error.config_missing")
-    fallback = current["scope_lines"][0]
+    fallback = (current["home_line"] if current["home_line"] in current["scope_lines"]
+                else current["scope_lines"][0])
     if config.get("display_mode") == "dual":
         panels = [
             (config.get("left_group"), config.get("left_line") or config.get("primary_line")),

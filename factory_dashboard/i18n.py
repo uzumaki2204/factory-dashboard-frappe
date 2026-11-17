@@ -12,7 +12,7 @@ def catalog():
 
 def message(key, lang=None, **values):
     if lang is None:
-        lang = getattr(frappe.local, "lang", "vi")
+        lang = getattr(frappe, "form_dict", {}).get("lang") or getattr(frappe.local, "lang", "vi")
     entries = catalog()
     template = entries.get((lang or "vi").split("-")[0], entries["vi"]).get(key, entries["vi"]["error.invalid_input"])
     return template.format(**values)
