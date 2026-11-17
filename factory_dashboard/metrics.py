@@ -138,25 +138,30 @@ def _slots(company, reports, production_date):
         quantity = quantities.pop(slot.name, 0)
         cumulative += quantity
         is_current = False
+        is_visible = quantity > 0
         try:
             zone = _time_zone()
             day = date.fromisoformat(production_date)
+            now = datetime.now(zone)
             slot_start = datetime.combine(day, time.fromisoformat(str(slot.start_time)), zone)
             slot_end = datetime.combine(day, time.fromisoformat(str(slot.end_time)), zone)
             if slot_end <= slot_start:
                 slot_end += timedelta(days=1)
-            is_current = slot_start <= datetime.now(zone) < slot_end
+            is_current = day == now.date() and slot_start <= now < slot_end
+            is_visible = is_visible or day < now.date() or (day == now.date() and now >= slot_start)
         except (TypeError, ValueError):
             pass
         result.append({"time_slot": slot.name, "label": slot.slot_name,
                        "start_time": str(slot.start_time), "end_time": str(slot.end_time),
                        "sort_order": int(slot.sort_order or 0), "quantity": quantity,
-                       "cumulative_quantity": cumulative, "is_current": is_current})
+                       "cumulative_quantity": cumulative, "is_current": is_current,
+                       "is_visible": is_visible})
     for name, quantity in sorted(quantities.items()):
         cumulative += quantity
         result.append({"time_slot": name, "label": name, "start_time": "", "end_time": "",
                        "sort_order": len(result) + 1, "quantity": quantity,
-                       "cumulative_quantity": cumulative, "is_current": False})
+                       "cumulative_quantity": cumulative, "is_current": False,
+                       "is_visible": quantity > 0})
     return result
 
 

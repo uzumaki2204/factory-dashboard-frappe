@@ -39,7 +39,7 @@
     "ui.technical_leader": "Kỹ thuật trưởng",
     "ui.time_slot": "Khung giờ",
     "ui.slot_output": "Sản lượng",
-    "ui.cumulative": "Lũy kế",
+    "ui.cumulative": "Tổng may",
     "ui.last_updated": "Cập nhật",
     "ui.loading": "Đang tải số liệu...",
     "ui.no_product": "Chưa có mã hàng cho ngày này.",
@@ -61,7 +61,8 @@
     "ui.produced": "Lũy kế sản xuất",
     "ui.daily_target": "Năng suất mục tiêu/ngày",
     "ui.current_target": "Mục tiêu hiện tại",
-    "ui.no_slots": "Chưa có khung giờ."
+    "ui.no_slots": "Chưa có khung giờ.",
+    "ui.slots_not_started": "Chưa đến khung giờ hiển thị."
   },
   "en": {
     "error.missing_doctype": "Required DocType is missing: {doctype}.",
@@ -125,6 +126,7 @@
     "ui.produced": "Cumulative production",
     "ui.daily_target": "Daily target",
     "ui.current_target": "Current target",
-    "ui.no_slots": "No time slots configured."
+    "ui.no_slots": "No time slots configured.",
+    "ui.slots_not_started": "No time slot has started yet."
   }
 }

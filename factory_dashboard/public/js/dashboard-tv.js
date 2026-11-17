@@ -56,12 +56,13 @@
         [t('ui.time_slot'), t('ui.slot_output'), t('ui.cumulative')].forEach(label => heading.append(element('span', '', label)));
         matrix.append(heading);
         const body = element('div', 'dashboard-tv-slot-body');
-        if (!rows.length) body.append(element('p', 'dashboard-tv-empty', t('ui.no_slots')));
-        rows.forEach(row => {
+        const visibleRows = rows.filter(row => row.is_visible);
+        if (!visibleRows.length) body.append(element('p', 'dashboard-tv-empty', t(rows.length ? 'ui.slots_not_started' : 'ui.no_slots')));
+        visibleRows.forEach(row => {
             const item = element('div', `dashboard-tv-slot-row${row.is_current ? ' is-current' : ''}`);
-            const range = row.start_time && row.end_time ? `${row.start_time.slice(0, 5)}–${row.end_time.slice(0, 5)}` : '';
-            const label = row.label && row.start_time && row.label.includes(row.start_time.slice(0, 5))
-                ? row.label : [row.label, range].filter(Boolean).join(' ');
+            const label = row.start_time && row.end_time
+                ? `${row.start_time.slice(0, 5)} - ${row.end_time.slice(0, 5)}`
+                : row.label || t('ui.no_value');
             item.append(element('strong', 'dashboard-tv-slot-time', label || t('ui.no_value')));
             item.append(element('strong', 'dashboard-tv-slot-quantity', number(row.quantity)));
             item.append(element('strong', 'dashboard-tv-slot-cumulative', number(row.cumulative_quantity)));
