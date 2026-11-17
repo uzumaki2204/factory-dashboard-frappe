@@ -4,13 +4,19 @@
 {% block footer %}{% endblock %}
 {% block content %}
 <main class="dashboard-tv" data-lang="{{ lang }}">
-  <nav class="dashboard-tv-actions" aria-label="{{ texts['ui.tv_title'] }}">
+  <aside class="dashboard-tv-edge dashboard-tv-edge-left" aria-label="{{ texts['ui.tv_controls'] }}">
+    <button class="dashboard-tv-edge-trigger" type="button" aria-label="{{ texts['ui.reveal_controls'] }}">⋮</button>
+    <button id="fullscreen-button" class="btn btn-primary dashboard-tv-edge-button" type="button" title="{{ texts['ui.fullscreen'] }}" aria-label="{{ texts['ui.fullscreen'] }}">{{ texts['ui.fullscreen'] }}</button>
+  </aside>
+  <aside class="dashboard-tv-edge dashboard-tv-edge-right" aria-label="{{ texts['ui.tv_controls'] }}">
+    <button class="dashboard-tv-edge-trigger" type="button" aria-label="{{ texts['ui.reveal_controls'] }}">⋮</button>
+    <button id="reset-device-button" class="btn btn-default dashboard-tv-edge-button" type="button" title="{{ texts['ui.reset_device'] }}" aria-label="{{ texts['ui.reset_device'] }}">{{ texts['ui.reset_device'] }}</button>
+  </aside>
+  <div class="dashboard-tv-live-status" aria-live="polite">
     <span id="dashboard-date"></span><span id="dashboard-source"></span>
-    <span id="dashboard-status" role="status" aria-live="polite"></span>
+    <span id="dashboard-status" role="status"></span>
     <span id="dashboard-updated"></span>
-    <button id="fullscreen-button" class="btn btn-default" type="button">{{ texts['ui.fullscreen'] }}</button>
-    <button id="refresh-button" class="btn btn-primary" type="button">{{ texts['ui.refresh'] }}</button>
-  </nav>
+  </div>
   <form id="dashboard-device-form" class="dashboard-tv-device" hidden>
     <label for="dashboard-device-id">{{ texts['ui.device_prompt'] }}</label>
     <div class="dashboard-tv-device-row"><input id="dashboard-device-id" class="form-control" type="text" autocomplete="off" placeholder="{{ texts['ui.device_placeholder'] }}" required><button class="btn btn-primary" type="submit">{{ texts['ui.open'] }}</button></div>

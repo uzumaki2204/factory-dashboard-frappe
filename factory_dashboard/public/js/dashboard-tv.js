@@ -164,10 +164,23 @@
         url.searchParams.set('device_id', value);
         window.location.assign(url);
     });
-    document.getElementById('refresh-button').addEventListener('click', load);
     document.getElementById('fullscreen-button').addEventListener('click', () => {
         if (document.fullscreenElement) document.exitFullscreen();
         else document.documentElement.requestFullscreen();
+    });
+    document.querySelectorAll('.dashboard-tv-edge-trigger').forEach(trigger => {
+        trigger.addEventListener('click', () => trigger.parentElement.classList.toggle('is-open'));
+    });
+    document.getElementById('reset-device-button').addEventListener('click', () => {
+        clearTimeout(timer);
+        window.localStorage.removeItem('factoryDashboardSession');
+        const url = new URL(window.location.href);
+        url.searchParams.delete('device_id');
+        window.history.replaceState({}, '', url);
+        panels.replaceChildren();
+        document.getElementById('dashboard-device-id').value = '';
+        form.hidden = false;
+        document.getElementById('dashboard-device-id').focus();
     });
     setInterval(updateClock, 1000);
     if (deviceId) load();

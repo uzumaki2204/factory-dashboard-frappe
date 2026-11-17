@@ -20,28 +20,63 @@ body[data-path="productivity-dashboard-tv"] {
     font-family: Inter, system-ui, sans-serif;
 }
 
-.dashboard-tv-actions {
+.dashboard-tv-edge {
+    position: fixed;
+    z-index: 20;
+    top: 50%;
     display: flex;
-    flex: 0 0 42px;
     align-items: center;
-    justify-content: flex-end;
-    gap: 10px;
-    min-height: 0;
-    padding: 2px 6px;
-    color: #476993;
-    font-size: 13px;
-    font-weight: 700;
+    width: 18px;
+    min-height: 96px;
+    transform: translateY(-50%);
+    transition: width .18s ease;
 }
 
-.dashboard-tv-actions span:not(:empty) {
-    padding: 5px 9px;
-    border: 1px solid #d2dcea;
-    border-radius: 5px;
-    background: #fff;
+.dashboard-tv-edge-left { left: 0; justify-content: flex-start; }
+.dashboard-tv-edge-right { right: 0; justify-content: flex-end; }
+.dashboard-tv-edge:hover,
+.dashboard-tv-edge:focus-within { width: max-content; max-width: min(320px, 90vw); }
+
+.dashboard-tv-edge-trigger {
+    width: 18px;
+    height: 72px;
+    padding: 0;
+    border: 0;
+    border-radius: 0 8px 8px 0;
+    background: #263a57;
+    color: #fff;
+    opacity: .12;
+    cursor: pointer;
 }
 
-.dashboard-tv-actions .btn {
-    min-height: 32px;
+.dashboard-tv-edge-right .dashboard-tv-edge-trigger { border-radius: 8px 0 0 8px; }
+.dashboard-tv-edge:hover .dashboard-tv-edge-trigger,
+.dashboard-tv-edge:focus-within .dashboard-tv-edge-trigger { opacity: .8; }
+
+.dashboard-tv-edge-button {
+    max-width: 0;
+    padding: 0;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+    transition: max-width .18s ease, padding .18s ease, opacity .18s ease;
+}
+
+.dashboard-tv-edge:hover .dashboard-tv-edge-button,
+.dashboard-tv-edge:focus-within .dashboard-tv-edge-button {
+    max-width: min(300px, 84vw);
+    padding: 8px 12px;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.dashboard-tv-live-status {
+    position: fixed;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
     white-space: nowrap;
 }
 
@@ -361,7 +396,8 @@ body[data-path="productivity-dashboard-tv"] {
     .dashboard-tv { height: auto; min-height: 100vh; overflow: visible; }
     .dashboard-tv-panels-dual { grid-template-columns: 1fr; }
     .dashboard-tv-board { min-height: 760px; }
-    .dashboard-tv-actions { flex: 0 0 auto; min-height: 42px; flex-wrap: wrap; justify-content: flex-start; }
+    .dashboard-tv-edge { min-height: 80px; width: 24px; }
+    .dashboard-tv-edge:focus-within { width: max-content; }
 }
 
 @media (max-width: 600px) {
@@ -373,4 +409,10 @@ body[data-path="productivity-dashboard-tv"] {
     .dashboard-tv-slot-quantity, .dashboard-tv-slot-cumulative { font-size: 28px; }
     .dashboard-tv-slot-heading { font-size: 10px; }
     .dashboard-tv-device-row { flex-direction: column; }
+}
+
+@media (hover: none) {
+    .dashboard-tv-edge { width: 24px; }
+    .dashboard-tv-edge-trigger { width: 24px; opacity: .45; }
+    .dashboard-tv-edge.is-open .dashboard-tv-edge-button { max-width: min(300px, 84vw); padding: 8px 12px; opacity: 1; pointer-events: auto; }
 }
