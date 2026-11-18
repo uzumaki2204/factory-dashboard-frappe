@@ -53,7 +53,9 @@ Ngày 18/11/2026, đã tạo hai kế hoạch và hai báo cáo tạm cho ngày 
 
 Trước cập nhật mã nguồn, dữ liệu sản lượng khớp nhưng Dashboard trả tỷ lệ lỗi `null`/không khả dụng khi chưa có QC, khác quy tắc .NET là 0%/khả dụng: [kết quả trước](tests/reference/pilot-sample-before-0.1.9.json). Sau khi checkout Pilot được cập nhật lên Productivity `043fa94`, Dashboard `5918204`, chạy `migrate` thành công (gồm patch `refresh_report_validation`) và khởi động lại web/worker, toàn bộ phép so sánh API đạt: [kết quả sau](tests/reference/pilot-sample-group-0.1.9.json).
 
-Lượt cập nhật trực tiếp trên checkout chưa chạy bước Pilot cài lại package và build asset. Ảnh Pilot sau đó xác nhận metadata cài đặt vẫn là Productivity `0.1.11` và Dashboard `0.1.8`. Tác vụ cập nhật chuẩn của Pilot đã tự hoàn tác vì Dashboard `0.1.9` khai báo nhầm Factory Management tối thiểu `0.1.97`, trong khi app master trên site là `0.1.87`. Bản phát hành hiệu chỉnh Dashboard `0.1.10` hạ yêu cầu về `0.1.87`; Productivity `0.1.13` đóng gói lại mã `0.1.12` để Pilot cài và cập nhật metadata. Cần dùng Pilot để cài hai bản phát hành này; không kéo code trực tiếp vào checkout.
+Lượt cập nhật trực tiếp trên checkout chưa chạy bước Pilot cài lại package và build asset. Ảnh Pilot sau đó xác nhận metadata cài đặt vẫn là Productivity `0.1.11` và Dashboard `0.1.8`. Tác vụ cập nhật chuẩn của Pilot đã tự hoàn tác vì Dashboard `0.1.9` khai báo nhầm Factory Management tối thiểu `0.1.97`, trong khi app master trên site là `0.1.87`. Bản phát hành hiệu chỉnh Dashboard `0.1.10` hạ yêu cầu về `0.1.87`; Productivity `0.1.13` đóng gói lại mã `0.1.12` để Pilot cài và cập nhật metadata.
+
+Sau khi push hai bản này, bộ kiểm tra cập nhật của Pilot báo Productivity `043fa94cef` → `dafdefced4` và Dashboard `8dba4f21c6` → `c6f841f6d4`; cả hai đều không cần migrate. Trong Pilot mở tab **Apps**, bấm **Fetch updates** để lấy trạng thái mới, rồi cập nhật Productivity trước Dashboard. Không kéo code trực tiếp vào checkout.
 
 Để chạy lại, đặt `FRAPPE_USER`/`FRAPPE_PASSWORD` hoặc `FRAPPE_API_TOKEN` trong môi trường, rồi chạy:
 
@@ -65,6 +67,6 @@ Script dừng trước khi tạo nếu chuyền đã có kế hoạch mở hoặ
 
 ## Cập nhật và quay lui
 
-Cập nhật `factory_productivity` trước, rồi `factory_dashboard` trên nhánh `version-16` qua Pilot. Bản phát hành Pilot hiện tại là Productivity `0.1.13` và Dashboard `0.1.10`. Không đổi tên/kiểu trường API; tỷ lệ lỗi rỗng trở thành 0, `start_time`/`end_time` được chuẩn hóa thành HH:mm. Không xóa báo cáo trùng đã tồn tại: Dashboard chọn một báo cáo mới nhất; nhập mới bị chặn trùng.
+Cập nhật `factory_productivity` trước, rồi `factory_dashboard` trên nhánh `version-16` qua Pilot. Các bản chờ cập nhật là Productivity `0.1.13` và Dashboard `0.1.10`. Không đổi tên/kiểu trường API; tỷ lệ lỗi rỗng trở thành 0, `start_time`/`end_time` được chuẩn hóa thành HH:mm. Không xóa báo cáo trùng đã tồn tại: Dashboard chọn một báo cáo mới nhất; nhập mới bị chặn trùng.
 
 Nếu cần quay lui app, dùng phiên bản trước trong Pilot: productivity 0.1.11, dashboard 0.1.8. Patch của bản productivity chỉ xóa cache metadata, không sửa dữ liệu lịch sử. Rollback không tự chạy.
