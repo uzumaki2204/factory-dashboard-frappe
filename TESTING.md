@@ -40,7 +40,7 @@ Script đọc tài liệu nguồn bằng REST và chạy bản metrics cục b�
 
 ## Kiểm tra ghi dữ liệu mẫu trên Pilot
 
-Ngày 18/11/2026, đã tạo hai kế hoạch và hai báo cáo tạm cho ngày 10/11/2026, chuyền 315/316, cùng mã hàng `217H005B`. Mỗi báo cáo có sáu khung giờ. Script lưu bằng API Productivity, đọc lại DocType, rồi đối chiếu API `summary` và `display` với số chuẩn từ `tests/reference/dotnet.json`. Chế độ gộp hai chuyền dùng cấu hình TV tạm; script xóa cấu hình và toàn bộ bản ghi mẫu trong `finally`.
+Ngày 18/11/2026, đã tạo hai kế hoạch và hai báo cáo tạm cho ngày 10/11/2026, chuyền 315/316, cùng mã hàng `217H005B`. Mỗi báo cáo có sáu khung giờ. Script lưu bằng API Productivity, kiểm tra kế hoạch xuất hiện trong `open_plans`, đọc lại DocType và `list_reports`, rồi đối chiếu API `summary` và `display` với số chuẩn từ `tests/reference/dotnet.json`. Chế độ gộp hai chuyền dùng cấu hình TV tạm; script xóa cấu hình và toàn bộ bản ghi mẫu trong `finally`.
 
 | Chỉ tiêu | Chuyền 315 | Chuyền 316 | Gộp |
 |---|---:|---:|---:|

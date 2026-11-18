@@ -127,6 +127,11 @@ def main():
                                "planned_quantity": sample["planned"],
                            })}, method="POST")["message"]["data"]
             compare(f"{line}.plan_id", plan["name"], plan_id)
+            available = request("/api/method/factory_productivity.api.open_plans",
+                                {"device_id": args.device_id, "production_date": args.day,
+                                 "line": line})["message"]
+            compare(f"{line}.plan_in_report_picker",
+                    plan_id in {row["name"] for row in available}, True)
 
             report_id = str(uuid.uuid4())
             created.append(("Productivity Report", report_id))
@@ -145,6 +150,12 @@ def main():
             actual_quantities = [int(row["finished_quantity"]) for row in source["time_slots"]]
             compare(f"{line}.report_quantities", actual_quantities, list(sample["quantities"]))
 
+        report_list = request("/api/method/factory_productivity.api.list_reports",
+                              {"device_id": args.device_id, "from_date": args.day,
+                               "to_date": args.day, "page_size": 50})["message"]
+        expected_names = sorted(name for doctype, name in created if doctype == "Productivity Report")
+        compare("report_list.names", sorted(row["name"] for row in report_list["items"]),
+                expected_names)
         summary = request("/api/method/factory_dashboard.api.summary",
                           {"device_id": args.device_id, "production_date": args.day})["message"]
         display = request("/api/method/factory_dashboard.api.display",
