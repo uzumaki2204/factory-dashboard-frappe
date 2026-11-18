@@ -498,5 +498,19 @@
       "denominator": 137,
       "percent": 5.8400
     }
-  ]
+  ],
+  "sample_calculations": {
+    "315": {
+      "current_target_quantity": 500,
+      "achievement_rate_percent": 88.00
+    },
+    "316": {
+      "current_target_quantity": 400,
+      "achievement_rate_percent": 75.00
+    },
+    "combined": {
+      "current_target_quantity": 900,
+      "achievement_rate_percent": 82.2200
+    }
+  }
 }

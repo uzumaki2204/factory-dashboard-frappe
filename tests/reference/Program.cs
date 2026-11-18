@@ -36,4 +36,11 @@ var plans = new[] {
 var selectedPlan = (ProductivityProductionPlan)Call("SelectPlan", lineId, day, plans, reports[1]);
 var rates = new[] { (0, 0), (1, 3), (1, 16), (270, 434), (5, 100), (8, 137) }
     .Select(x => new { numerator = x.Item1, denominator = x.Item2, percent = x.Item2 == 0 ? 0m : Math.Round(x.Item1 / (decimal)x.Item2, 4, MidpointRounding.AwayFromZero) * 100 }).ToArray();
-Console.WriteLine(JsonSerializer.Serialize(new { targets, slots, latest_report = latest.Id, selected_plan = selectedPlan.Id, rates }, new JsonSerializerOptions { WriteIndented = true }));
+var sampleDay = new DateOnly(2026, 11, 10);
+var sampleNow = new DateTime(2026, 11, 18, 10, 0, 0);
+var sampleCalculations = new[] { (Name: "315", Produced: 440, Target: 500), (Name: "316", Produced: 300, Target: 400), (Name: "combined", Produced: 740, Target: 900) }
+    .ToDictionary(x => x.Name, x => new {
+        current_target_quantity = Call("CalculateCurrentTargetQuantity", sampleDay, x.Target, 8m, sampleNow),
+        achievement_rate_percent = Math.Round(x.Produced / (decimal)x.Target, 4, MidpointRounding.AwayFromZero) * 100
+    });
+Console.WriteLine(JsonSerializer.Serialize(new { targets, slots, latest_report = latest.Id, selected_plan = selectedPlan.Id, rates, sample_calculations = sampleCalculations }, new JsonSerializerOptions { WriteIndented = true }));

@@ -1,0 +1,191 @@
+{
+  "day": "2026-11-10",
+  "product_code": "217H005B",
+  "lines": [
+    "315",
+    "316"
+  ],
+  "slots": [
+    "KT2-Ca 1 (07:30–09:30)",
+    "KT2-Ca 2 (09:30–11:30)",
+    "KT2-Ca 3 (12:30–14:30)",
+    "KT2-Ca 4 (14:30–16:30)",
+    "KT2-Ca 5 (16:30–18:30)",
+    "KT2-Ca 6 (18:30–20:30)"
+  ],
+  "expected": {
+    "315": {
+      "product_code": "217H005B",
+      "planned_quantity": 1200,
+      "report_count": 1,
+      "finished_quantity": 440,
+      "daily_target_quantity": 500,
+      "current_target_quantity": 500,
+      "achievement_rate_percent": 88.0,
+      "worker_count": 20,
+      "working_hours": 8,
+      "ironing_delivery_quantity": 3,
+      "slot_quantities": [
+        80,
+        100,
+        120,
+        140,
+        0,
+        0
+      ],
+      "slot_cumulative": [
+        80,
+        180,
+        300,
+        440,
+        440,
+        440
+      ]
+    },
+    "316": {
+      "product_code": "217H005B",
+      "planned_quantity": 900,
+      "report_count": 1,
+      "finished_quantity": 300,
+      "daily_target_quantity": 400,
+      "current_target_quantity": 400,
+      "achievement_rate_percent": 75.0,
+      "worker_count": 15,
+      "working_hours": 8,
+      "ironing_delivery_quantity": 2,
+      "slot_quantities": [
+        50,
+        70,
+        80,
+        100,
+        0,
+        0
+      ],
+      "slot_cumulative": [
+        50,
+        120,
+        200,
+        300,
+        300,
+        300
+      ]
+    }
+  },
+  "actual": {
+    "mode": "qc_input",
+    "display_mode": "single",
+    "display_lines": [
+      [
+        "315"
+      ]
+    ],
+    "315": {
+      "product_code": "217H005B",
+      "planned_quantity": 1200,
+      "report_count": 1,
+      "finished_quantity": 440,
+      "daily_target_quantity": 500,
+      "current_target_quantity": 500,
+      "achievement_rate_percent": 88.0,
+      "worker_count": 20,
+      "working_hours": 8.0,
+      "ironing_delivery_quantity": 3,
+      "slot_quantities": [
+        80,
+        100,
+        120,
+        140,
+        0,
+        0
+      ],
+      "slot_cumulative": [
+        80,
+        180,
+        300,
+        440,
+        440,
+        440
+      ],
+      "qc_total_quantity": 0,
+      "defect_quantity": 0,
+      "defect_rate_percent": null,
+      "has_defect_rate": false
+    },
+    "316": {
+      "product_code": "217H005B",
+      "planned_quantity": 900,
+      "report_count": 1,
+      "finished_quantity": 300,
+      "daily_target_quantity": 400,
+      "current_target_quantity": 400,
+      "achievement_rate_percent": 75.0,
+      "worker_count": 15,
+      "working_hours": 8.0,
+      "ironing_delivery_quantity": 2,
+      "slot_quantities": [
+        50,
+        70,
+        80,
+        100,
+        0,
+        0
+      ],
+      "slot_cumulative": [
+        50,
+        120,
+        200,
+        300,
+        300,
+        300
+      ],
+      "qc_total_quantity": 0,
+      "defect_quantity": 0,
+      "defect_rate_percent": null,
+      "has_defect_rate": false
+    }
+  },
+  "differences": [
+    {
+      "path": "315.defect_rate_percent",
+      "expected": 0.0,
+      "actual": null
+    },
+    {
+      "path": "315.has_defect_rate",
+      "expected": true,
+      "actual": false
+    },
+    {
+      "path": "316.defect_rate_percent",
+      "expected": 0.0,
+      "actual": null
+    },
+    {
+      "path": "316.has_defect_rate",
+      "expected": true,
+      "actual": false
+    }
+  ],
+  "cleanup": [
+    {
+      "doctype": "Productivity Report",
+      "name": "ee58a8dd-3ff9-40e2-b310-f126575f06a7",
+      "deleted": true
+    },
+    {
+      "doctype": "Productivity Production Plan",
+      "name": "7efca021-808a-4953-ab2d-d95024526d81",
+      "deleted": true
+    },
+    {
+      "doctype": "Productivity Report",
+      "name": "d125c92b-2ecc-43cd-99e8-79e95ba642cc",
+      "deleted": true
+    },
+    {
+      "doctype": "Productivity Production Plan",
+      "name": "0650364b-b4cd-43e1-92ca-94250cd71782",
+      "deleted": true
+    }
+  ]
+}

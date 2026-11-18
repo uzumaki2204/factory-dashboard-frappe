@@ -38,6 +38,29 @@ Script đọc tài liệu nguồn bằng REST và chạy bản metrics cục b�
 - Đã chạy 28 test .NET liên quan: 26 đạt, 2 lỗi có sẵn trong `ProductivityProductionPlanClosedDateTests` ở hai trường hợp hợp nhất kế hoạch (`FinishAsync_SelfHealsLegacyMergedScopeOverlap_AndSavesClosedDate`, `UpdateClosedDateAsync_ReturnsRefreshMessage_WhenPlanIsAbsorbedByRepair`). Không thay đổi source .NET trong đợt này.
 - Bộ test này không xác nhận quy trình sửa/hợp nhất dữ liệu legacy của .NET; không đồng bộ dữ liệu cũ vào Frappe.
 
+## Kiểm tra ghi dữ liệu mẫu trên Pilot
+
+Ngày 18/11/2026, đã tạo hai kế hoạch và hai báo cáo tạm cho ngày 10/11/2026, chuyền 315/316, cùng mã hàng `217H005B`. Mỗi báo cáo có sáu khung giờ. Script lưu bằng API Productivity, đọc lại DocType, rồi đối chiếu API `summary` và `display` với số chuẩn từ `tests/reference/dotnet.json`. Chế độ gộp hai chuyền dùng cấu hình TV tạm; script xóa cấu hình và toàn bộ bản ghi mẫu trong `finally`.
+
+| Chỉ tiêu | Chuyền 315 | Chuyền 316 | Gộp |
+|---|---:|---:|---:|
+| Kế hoạch | 1.200 | 900 | 2.100 |
+| Hoàn thành | 440 | 300 | 740 |
+| Mục tiêu ngày / hiện tại | 500 | 400 | 900 |
+| Tỷ lệ đạt | 88% | 75% | 82,22% |
+| Công nhân | 20 | 15 | 35 |
+| Lũy kế sáu khung giờ | 80, 180, 300, 440, 440, 440 | 50, 120, 200, 300, 300, 300 | 130, 300, 500, 740, 740, 740 |
+
+Trước cập nhật, dữ liệu sản lượng khớp nhưng Dashboard trả tỷ lệ lỗi `null`/không khả dụng khi chưa có QC, khác quy tắc .NET là 0%/khả dụng: [kết quả trước](tests/reference/pilot-sample-before-0.1.9.json). Đã cập nhật checkout trên Pilot lên Productivity `043fa94`, Dashboard `5918204`, chạy `migrate` thành công (gồm patch `refresh_report_validation`) và khởi động lại web/worker. Sau cập nhật, toàn bộ phép so sánh đạt, không còn chênh lệch: [kết quả sau](tests/reference/pilot-sample-group-0.1.9.json).
+
+Để chạy lại, đặt `FRAPPE_USER`/`FRAPPE_PASSWORD` hoặc `FRAPPE_API_TOKEN` trong môi trường, rồi chạy:
+
+```powershell
+python tools/verify_productivity_sample.py --url http://192.168.52.75:8080 --device-id 35b75945-db68-4cb8-b3c4-5a4575e72320 --day 2026-11-10 --output tests/reference/pilot-sample-rerun.json
+```
+
+Script dừng trước khi tạo nếu chuyền đã có kế hoạch mở hoặc đã có báo cáo trong ngày mẫu. Sau lần chạy này, kiểm tra lại trên site: còn một kế hoạch cũ, không có báo cáo năng suất và không có cấu hình TV. Phép thử QC chỉ xác nhận trường hợp nguồn QC bằng 0; chưa tạo sự kiện QC/UQQC mẫu khác 0.
+
 ## Cập nhật và quay lui
 
 Cập nhật `factory_productivity` trước, rồi `factory_dashboard` trên nhánh `version-16` qua Pilot. Không đổi tên/kiểu trường API; tỷ lệ lỗi rỗng trở thành 0, `start_time`/`end_time` được chuẩn hóa thành HH:mm. Không xóa báo cáo trùng đã tồn tại: Dashboard chọn một báo cáo mới nhất; nhập mới bị chặn trùng.
