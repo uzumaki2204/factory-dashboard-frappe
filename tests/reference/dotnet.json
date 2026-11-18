@@ -1,0 +1,502 @@
+{
+  "targets": [
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-16T23:59:59",
+      "hours": 0,
+      "target": 519,
+      "expected": 519
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T07:29:59",
+      "hours": 0,
+      "target": 519,
+      "expected": 519
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T07:30:00",
+      "hours": 0,
+      "target": 519,
+      "expected": 519
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T09:30:00",
+      "hours": 0,
+      "target": 519,
+      "expected": 519
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T11:30:00",
+      "hours": 0,
+      "target": 519,
+      "expected": 519
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T12:00:00",
+      "hours": 0,
+      "target": 519,
+      "expected": 519
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T12:30:00",
+      "hours": 0,
+      "target": 519,
+      "expected": 519
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T16:30:00",
+      "hours": 0,
+      "target": 519,
+      "expected": 519
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-18T00:00:00",
+      "hours": 0,
+      "target": 519,
+      "expected": 519
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-16T23:59:59",
+      "hours": 4,
+      "target": 519,
+      "expected": 0
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T07:29:59",
+      "hours": 4,
+      "target": 519,
+      "expected": 0
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T07:30:00",
+      "hours": 4,
+      "target": 519,
+      "expected": 0
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T09:30:00",
+      "hours": 4,
+      "target": 519,
+      "expected": 259
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T11:30:00",
+      "hours": 4,
+      "target": 519,
+      "expected": 519
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T12:00:00",
+      "hours": 4,
+      "target": 519,
+      "expected": 519
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T12:30:00",
+      "hours": 4,
+      "target": 519,
+      "expected": 519
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T16:30:00",
+      "hours": 4,
+      "target": 519,
+      "expected": 519
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-18T00:00:00",
+      "hours": 4,
+      "target": 519,
+      "expected": 519
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-16T23:59:59",
+      "hours": 8,
+      "target": 519,
+      "expected": 0
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T07:29:59",
+      "hours": 8,
+      "target": 519,
+      "expected": 0
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T07:30:00",
+      "hours": 8,
+      "target": 519,
+      "expected": 0
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T09:30:00",
+      "hours": 8,
+      "target": 519,
+      "expected": 129
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T11:30:00",
+      "hours": 8,
+      "target": 519,
+      "expected": 259
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T12:00:00",
+      "hours": 8,
+      "target": 519,
+      "expected": 259
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T12:30:00",
+      "hours": 8,
+      "target": 519,
+      "expected": 259
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T16:30:00",
+      "hours": 8,
+      "target": 519,
+      "expected": 519
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-18T00:00:00",
+      "hours": 8,
+      "target": 519,
+      "expected": 519
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-16T23:59:59",
+      "hours": 9.5,
+      "target": 519,
+      "expected": 0
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T07:29:59",
+      "hours": 9.5,
+      "target": 519,
+      "expected": 0
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T07:30:00",
+      "hours": 9.5,
+      "target": 519,
+      "expected": 0
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T09:30:00",
+      "hours": 9.5,
+      "target": 519,
+      "expected": 109
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T11:30:00",
+      "hours": 9.5,
+      "target": 519,
+      "expected": 218
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T12:00:00",
+      "hours": 9.5,
+      "target": 519,
+      "expected": 218
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T12:30:00",
+      "hours": 9.5,
+      "target": 519,
+      "expected": 218
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T16:30:00",
+      "hours": 9.5,
+      "target": 519,
+      "expected": 437
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-18T00:00:00",
+      "hours": 9.5,
+      "target": 519,
+      "expected": 519
+    }
+  ],
+  "slots": [
+    {
+      "day": "2026-11-16",
+      "now": "2026-11-17T07:29:59",
+      "quantity": 0,
+      "visible": true,
+      "current": false
+    },
+    {
+      "day": "2026-11-16",
+      "now": "2026-11-17T07:29:59",
+      "quantity": 80,
+      "visible": true,
+      "current": false
+    },
+    {
+      "day": "2026-11-16",
+      "now": "2026-11-17T07:30:00",
+      "quantity": 0,
+      "visible": true,
+      "current": false
+    },
+    {
+      "day": "2026-11-16",
+      "now": "2026-11-17T07:30:00",
+      "quantity": 80,
+      "visible": true,
+      "current": false
+    },
+    {
+      "day": "2026-11-16",
+      "now": "2026-11-17T09:29:59",
+      "quantity": 0,
+      "visible": true,
+      "current": false
+    },
+    {
+      "day": "2026-11-16",
+      "now": "2026-11-17T09:29:59",
+      "quantity": 80,
+      "visible": true,
+      "current": false
+    },
+    {
+      "day": "2026-11-16",
+      "now": "2026-11-17T09:30:00",
+      "quantity": 0,
+      "visible": true,
+      "current": false
+    },
+    {
+      "day": "2026-11-16",
+      "now": "2026-11-17T09:30:00",
+      "quantity": 80,
+      "visible": true,
+      "current": false
+    },
+    {
+      "day": "2026-11-16",
+      "now": "2026-11-17T23:59:59",
+      "quantity": 0,
+      "visible": true,
+      "current": false
+    },
+    {
+      "day": "2026-11-16",
+      "now": "2026-11-17T23:59:59",
+      "quantity": 80,
+      "visible": true,
+      "current": false
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T07:29:59",
+      "quantity": 0,
+      "visible": false,
+      "current": false
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T07:29:59",
+      "quantity": 80,
+      "visible": true,
+      "current": false
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T07:30:00",
+      "quantity": 0,
+      "visible": true,
+      "current": true
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T07:30:00",
+      "quantity": 80,
+      "visible": true,
+      "current": true
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T09:29:59",
+      "quantity": 0,
+      "visible": true,
+      "current": true
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T09:29:59",
+      "quantity": 80,
+      "visible": true,
+      "current": true
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T09:30:00",
+      "quantity": 0,
+      "visible": true,
+      "current": false
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T09:30:00",
+      "quantity": 80,
+      "visible": true,
+      "current": false
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T23:59:59",
+      "quantity": 0,
+      "visible": true,
+      "current": false
+    },
+    {
+      "day": "2026-11-17",
+      "now": "2026-11-17T23:59:59",
+      "quantity": 80,
+      "visible": true,
+      "current": false
+    },
+    {
+      "day": "2026-11-18",
+      "now": "2026-11-17T07:29:59",
+      "quantity": 0,
+      "visible": false,
+      "current": false
+    },
+    {
+      "day": "2026-11-18",
+      "now": "2026-11-17T07:29:59",
+      "quantity": 80,
+      "visible": true,
+      "current": false
+    },
+    {
+      "day": "2026-11-18",
+      "now": "2026-11-17T07:30:00",
+      "quantity": 0,
+      "visible": false,
+      "current": false
+    },
+    {
+      "day": "2026-11-18",
+      "now": "2026-11-17T07:30:00",
+      "quantity": 80,
+      "visible": true,
+      "current": false
+    },
+    {
+      "day": "2026-11-18",
+      "now": "2026-11-17T09:29:59",
+      "quantity": 0,
+      "visible": false,
+      "current": false
+    },
+    {
+      "day": "2026-11-18",
+      "now": "2026-11-17T09:29:59",
+      "quantity": 80,
+      "visible": true,
+      "current": false
+    },
+    {
+      "day": "2026-11-18",
+      "now": "2026-11-17T09:30:00",
+      "quantity": 0,
+      "visible": false,
+      "current": false
+    },
+    {
+      "day": "2026-11-18",
+      "now": "2026-11-17T09:30:00",
+      "quantity": 80,
+      "visible": true,
+      "current": false
+    },
+    {
+      "day": "2026-11-18",
+      "now": "2026-11-17T23:59:59",
+      "quantity": 0,
+      "visible": false,
+      "current": false
+    },
+    {
+      "day": "2026-11-18",
+      "now": "2026-11-17T23:59:59",
+      "quantity": 80,
+      "visible": true,
+      "current": false
+    }
+  ],
+  "latest_report": "00000000-0000-0000-0000-000000000011",
+  "selected_plan": "00000000-0000-0000-0000-000000000021",
+  "rates": [
+    {
+      "numerator": 0,
+      "denominator": 0,
+      "percent": 0
+    },
+    {
+      "numerator": 1,
+      "denominator": 3,
+      "percent": 33.3300
+    },
+    {
+      "numerator": 1,
+      "denominator": 16,
+      "percent": 6.2500
+    },
+    {
+      "numerator": 270,
+      "denominator": 434,
+      "percent": 62.2100
+    },
+    {
+      "numerator": 5,
+      "denominator": 100,
+      "percent": 5.00
+    },
+    {
+      "numerator": 8,
+      "denominator": 137,
+      "percent": 5.8400
+    }
+  ]
+}

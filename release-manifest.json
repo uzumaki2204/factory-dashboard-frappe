@@ -1,9 +1,9 @@
 {
   "app": "factory_dashboard",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "branch": "version-16",
   "frappe": ">=16.53.0,<17.0.0",
-  "factory_management": ">=0.1.87,<0.2.0",
-  "factory_productivity": ">=0.1.0,<0.2.0",
+  "factory_management": ">=0.1.97,<0.2.0",
+  "factory_productivity": ">=0.1.12,<0.2.0",
   "migration": "migrate runs post_model_sync dashboard defaults and defect source normalization patches"
 }

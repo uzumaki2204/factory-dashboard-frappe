@@ -10,6 +10,11 @@
     const params = new URLSearchParams(window.location.search);
     const deviceId = (params.get('device_id') || '').trim();
     const number = value => new Intl.NumberFormat(root.dataset.lang || 'vi').format(Number(value) || 0);
+    const percent = value => {
+        const numeric = Number(value) || 0;
+        const decimals = Math.abs(numeric - Math.round(numeric)) < .05 ? 0 : 1;
+        return `${numeric.toFixed(decimals)}%`;
+    };
     let timer;
 
     function element(tag, className, value) {
@@ -46,7 +51,7 @@
         detail.append(element('strong', '', row.line_code || row.line_name || row.line));
         detail.append(element('span', '', row.product_code || t('ui.no_value')));
         detail.append(element('span', '', `${t('ui.defects')}: ${number(row.defect_quantity)}`));
-        detail.append(element('span', '', `${t('ui.defect_rate')}: ${row.has_defect_rate ? `${number(row.defect_rate_percent)}%` : t('ui.no_value')}`));
+        detail.append(element('span', '', `${t('ui.defect_rate')}: ${row.has_defect_rate ? percent(row.defect_rate_percent) : t('ui.no_value')}`));
         return detail;
     }
 
@@ -109,9 +114,9 @@
         board.append(head);
         const kpis = element('div', 'dashboard-tv-kpis');
         kpis.append(kpi(t('ui.daily_target'), number(row.daily_target_quantity), 'blue'));
-        kpis.append(kpi(t('ui.defect_rate'), row.has_defect_rate ? `${number(row.defect_rate_percent)}%` : t('ui.no_value'), 'green', row.defect_rate_unavailable_reason));
+        kpis.append(kpi(t('ui.defect_rate'), row.has_defect_rate ? percent(row.defect_rate_percent) : t('ui.no_value'), 'green', row.defect_rate_unavailable_reason));
         kpis.append(kpi(t('ui.current_target'), number(row.current_target_quantity), 'blue'));
-        kpis.append(kpi(t('ui.achievement'), `${number(row.achievement_rate_percent)}%`, 'green'));
+        kpis.append(kpi(t('ui.achievement'), percent(row.achievement_rate_percent), 'green'));
         board.append(kpis);
         if (!row.report_count || !row.has_defect_rate) {
             board.append(element('div', 'dashboard-tv-data-note', !row.report_count ? t('ui.no_report') : row.defect_rate_unavailable_reason || t('ui.no_quality_data')));

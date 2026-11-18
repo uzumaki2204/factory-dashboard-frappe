@@ -62,7 +62,8 @@
     "ui.daily_target": "Năng suất mục tiêu/ngày",
     "ui.current_target": "Mục tiêu hiện tại",
     "ui.no_slots": "Chưa có khung giờ.",
-    "ui.slots_not_started": "Chưa đến khung giờ hiển thị."
+    "ui.slots_not_started": "Chưa đến khung giờ hiển thị.",
+    "ui.multiple_leaders": "Nhiều người phụ trách"
   },
   "en": {
     "error.missing_doctype": "Required DocType is missing: {doctype}.",
@@ -127,6 +128,7 @@
     "ui.daily_target": "Daily target",
     "ui.current_target": "Current target",
     "ui.no_slots": "No time slots configured.",
-    "ui.slots_not_started": "No time slot has started yet."
+    "ui.slots_not_started": "No time slot has started yet.",
+    "ui.multiple_leaders": "Multiple leaders"
   }
 }

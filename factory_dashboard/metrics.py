@@ -12,9 +12,9 @@ from factory_dashboard.i18n import message
 
 def _rate(defects, checked, mode):
     if not checked:
-        return None
-    precision = Decimal("0.1") if mode == "uqqc_input" else Decimal("0.01")
-    return float((Decimal(defects) * 100 / Decimal(checked)).quantize(precision, rounding=ROUND_HALF_UP))
+        return 0.0
+    # .NET rounds the ratio to four places before converting it to percent.
+    return float((Decimal(defects) / Decimal(checked)).quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP) * 100)
 
 
 def _current_target(production_date, daily_target, working_hours):
@@ -33,8 +33,9 @@ def _current_target(production_date, daily_target, working_hours):
         lunch_start = datetime.combine(day, time(11, 30), zone)
         lunch_end = lunch_start + timedelta(hours=1)
         elapsed -= max(0, (min(now, lunch_end) - max(start, lunch_start)).total_seconds() / 60)
-    maximum = working_hours * 60
-    return min(daily_target, max(0, int(daily_target * min(max(0, elapsed), maximum) / maximum)))
+    maximum = Decimal(str(working_hours)) * 60
+    progress = min(Decimal(str(max(0, elapsed))), maximum) / maximum
+    return min(daily_target, max(0, int(Decimal(daily_target) * progress)))
 
 
 def _qc1(device_name):
@@ -71,8 +72,9 @@ def _quality(line, product, production_date, mode):
              ["occurred_at", "<", finish.strftime("%Y-%m-%d %H:%M:%S.%f")]],
         ))
         passed = sum(int(row.quantity or 0) for row in events if row.event_kind == "pass")
-        defects = sum(int(row.quantity or 0) for row in events if row.event_kind == "defect")
-        return max(0, passed + defects), max(0, defects), sum(1 for row in events if row.event_kind == "defect")
+        rework = sum(int(row.quantity or 0) for row in events if row.event_kind == "rework")
+        passed, rework = max(0, passed), max(0, rework)
+        return passed + rework, rework, sum(1 for row in events if row.event_kind == "defect")
 
     events = list(_events(
         "QC Inspection Event", ["device", "event_type", "quantity_delta", "defect"],
@@ -85,7 +87,7 @@ def _quality(line, product, production_date, mode):
         filters={"name": ["in", list(device_names)]}, limit_page_length=len(device_names),
     ) if _qc1(row.device_name)} if device_names else set()
     checked = 0
-    by_defect = defaultdict(int)
+    defects = 0
     defect_events = 0
     for row in events:
         if row.device not in qc1_devices:
@@ -93,29 +95,32 @@ def _quality(line, product, production_date, mode):
         delta = int(row.quantity_delta or 0)
         if row.event_type in ("CumulativeAdd", "CumulativeSubtract"):
             checked = max(0, checked + delta)
-        elif row.defect and row.event_type in ("DefectAdd", "DefectSubtract"):
-            by_defect[row.defect] = max(0, by_defect[row.defect] + delta)
+        elif row.event_type in ("DefectAdd", "DefectSubtract"):
+            defects = max(0, defects + delta)
             if delta > 0:
                 defect_events += 1
-    return checked, sum(by_defect.values()), defect_events
+    return checked, defects, defect_events
 
 
 def _plan(line, production_date, report):
-    if report and report.production_plan:
-        rows = frappe.get_all(
-            "Productivity Production Plan",
-            fields=["name", "product", "line_start_date", "shipment_date", "planned_quantity"],
-            filters={"name": report.production_plan, "is_deleted": 0}, limit_page_length=1,
-        )
-        if rows:
-            return rows[0]
     rows = frappe.get_all(
         "Productivity Production Plan",
-        fields=["name", "product", "line_start_date", "shipment_date", "closed_production_date", "planned_quantity"],
+        fields=["name", "product", "line_start_date", "shipment_date", "closed_production_date", "planned_quantity", "modified"],
         filters={"line": line, "is_deleted": 0, "line_start_date": ["<=", production_date]},
-        order_by="line_start_date desc, modified desc", limit_page_length=200,
+        order_by="line_start_date desc, modified desc, name desc", limit_page_length=0,
     )
-    return next((row for row in rows if str(row.closed_production_date or row.shipment_date) >= production_date), None)
+    candidates = [row for row in rows if str(row.closed_production_date or row.shipment_date) >= production_date]
+    return max(candidates, key=lambda row: (str(row.line_start_date), str(row.closed_production_date or row.shipment_date), str(row.modified or ''), row.name), default=None)
+
+
+def _slot_time(value):
+    if isinstance(value, timedelta):
+        seconds = int(value.total_seconds()) % 86400
+        return time(seconds // 3600, seconds % 3600 // 60, seconds % 60)
+    if isinstance(value, time):
+        return value
+    parts = str(value).split(':')
+    return time(int(parts[0]), int(parts[1]), int(float(parts[2])) if len(parts) > 2 else 0)
 
 
 def _slots(company, reports, production_date):
@@ -132,6 +137,11 @@ def _slots(company, reports, production_date):
             limit_page_length=10000,
         ):
             quantities[row.time_slot] += int(row.finished_quantity or 0)
+    missing = set(quantities) - {slot.name for slot in slots}
+    if missing:
+        slots.extend(frappe.get_all('Time Slot', fields=['name', 'slot_name', 'start_time', 'end_time', 'sort_order'],
+                                   filters={'name': ['in', sorted(missing)], 'company': company}, limit_page_length=0))
+    slots.sort(key=lambda slot: (int(slot.sort_order or 0), str(slot.start_time), slot.name))
     result = []
     cumulative = 0
     for slot in slots:
@@ -139,20 +149,23 @@ def _slots(company, reports, production_date):
         cumulative += quantity
         is_current = False
         is_visible = quantity > 0
+        start_time = end_time = ''
         try:
             zone = _time_zone()
             day = date.fromisoformat(production_date)
             now = datetime.now(zone)
-            slot_start = datetime.combine(day, time.fromisoformat(str(slot.start_time)), zone)
-            slot_end = datetime.combine(day, time.fromisoformat(str(slot.end_time)), zone)
+            start, end = _slot_time(slot.start_time), _slot_time(slot.end_time)
+            start_time, end_time = start.strftime('%H:%M'), end.strftime('%H:%M')
+            slot_start = datetime.combine(day, start, zone)
+            slot_end = datetime.combine(day, end, zone)
             if slot_end <= slot_start:
                 slot_end += timedelta(days=1)
             is_current = day == now.date() and slot_start <= now < slot_end
             is_visible = is_visible or day < now.date() or (day == now.date() and now >= slot_start)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, IndexError):
             pass
         result.append({"time_slot": slot.name, "label": slot.slot_name,
-                       "start_time": str(slot.start_time), "end_time": str(slot.end_time),
+                       "start_time": start_time, "end_time": end_time,
                        "sort_order": int(slot.sort_order or 0), "quantity": quantity,
                        "cumulative_quantity": cumulative, "is_current": is_current,
                        "is_visible": is_visible})
@@ -172,18 +185,18 @@ def line_summary(line, production_date, mode):
         fields=["name", "product", "production_plan", "daily_target_quantity", "worker_count",
                 "working_hours", "ironing_delivery_quantity"],
         filters={"line": line, "production_date": production_date, "is_deleted": 0},
-        order_by="modified desc", limit_page_length=10000,
+        order_by="modified desc, creation desc, name desc", limit_page_length=1,
     )
     selected = reports[0] if reports else None
     plan = _plan(line, production_date, selected)
-    product = selected.product if selected else (plan.product if plan else None)
-    selected_reports = [row for row in reports if row.product == product]
+    product = plan.product if plan else (selected.product if selected else None)
+    selected_reports = [selected] if selected else []
     time_slots = _slots(line_doc.get("company"), selected_reports, production_date)
     checked, defects, defect_events = _quality(line, product, production_date, mode)
     rate = _rate(defects, checked, mode)
     line_info = frappe.get_all(
         "Productivity Line Info", fields=["line_leader_name", "technical_leader_name"],
-        filters={"line": line, "is_deleted": 0}, order_by="modified desc", limit_page_length=1,
+        filters={"line": line, "is_deleted": 0}, order_by="modified desc, creation desc, name desc", limit_page_length=1,
     )
     product_code = frappe.db.get_value("Product", product, "product_code") if product else ""
     target = sum(int(row.daily_target_quantity or 0) for row in selected_reports)
@@ -196,7 +209,7 @@ def line_summary(line, production_date, mode):
         "production_date": production_date, "product_code": product_code or "",
         "production_plan": plan.name if plan else None,
         "plan_start_date": str(plan.line_start_date) if plan else None,
-        "plan_shipment_date": str(plan.shipment_date) if plan else None,
+        "plan_shipment_date": str(plan.closed_production_date or plan.shipment_date) if plan else None,
         "planned_quantity": int(plan.planned_quantity or 0) if plan else 0,
         "report_count": len(selected_reports), "finished_quantity": finished,
         "daily_target_quantity": target, "current_target_quantity": current_target,
@@ -225,7 +238,10 @@ def panel_summary(lines, label, production_date, mode):
     for entry in entries:
         for row in entry["time_slots"]:
             slots[row["time_slot"]] += row["quantity"]
-            definitions[row["time_slot"]] = row
+            previous = definitions.get(row['time_slot'], {})
+            definitions[row["time_slot"]] = dict(row,
+                is_visible=previous.get('is_visible', False) or row.get('is_visible', False),
+                is_current=previous.get('is_current', False) or row.get('is_current', False))
     cumulative = 0
     time_slots = []
     for key in sorted(slots, key=lambda slot: (definitions[slot]["sort_order"], definitions[slot]["start_time"], slot)):
@@ -235,7 +251,7 @@ def panel_summary(lines, label, production_date, mode):
         row["cumulative_quantity"] = cumulative
         time_slots.append(row)
     rate = None if mixed else _rate(defects, checked, mode)
-    return {
+    result = {
         "line": lines[0] if len(lines) == 1 else None,
         "line_code": entries[0]["line_code"] if len(entries) == 1 else "",
         "line_name": label or (entries[0]["line_name"] if len(entries) == 1 else ""),
@@ -247,15 +263,15 @@ def panel_summary(lines, label, production_date, mode):
         "daily_target_quantity": sum(entry["daily_target_quantity"] for entry in entries),
         "current_target_quantity": sum(entry["current_target_quantity"] for entry in entries),
         "planned_quantity": sum(entry["planned_quantity"] for entry in entries),
-        "plan_start_date": entries[0]["plan_start_date"] if len(entries) == 1 else None,
-        "plan_shipment_date": entries[0]["plan_shipment_date"] if len(entries) == 1 else None,
+        "plan_start_date": min((entry['plan_start_date'] for entry in entries if entry['plan_start_date']), default=None),
+        "plan_shipment_date": max((entry['plan_shipment_date'] for entry in entries if entry['plan_shipment_date']), default=None),
         "worker_count": sum(entry["worker_count"] for entry in entries),
         "working_hours": sum(entry["working_hours"] for entry in entries),
         "ironing_delivery_quantity": sum(entry["ironing_delivery_quantity"] for entry in entries),
         "achievement_rate_percent": _rate(sum(entry["finished_quantity"] for entry in entries),
                                            sum(entry["current_target_quantity"] for entry in entries), "qc_input") or 0,
-        "line_leader_name": entries[0]["line_leader_name"] if len(entries) == 1 else "",
-        "technical_leader_name": entries[0]["technical_leader_name"] if len(entries) == 1 else "",
+        "line_leader_name": _shared(entries, 'line_leader_name'),
+        "technical_leader_name": _shared(entries, 'technical_leader_name'),
         "qc_total_quantity": checked, "defect_quantity": defects,
         "defect_events": sum(entry["defect_events"] for entry in entries),
         "defect_rate_percent": rate, "has_defect_rate": rate is not None,
@@ -263,3 +279,14 @@ def panel_summary(lines, label, production_date, mode):
             "ui.mixed_products" if mixed else "ui.no_quality_data"),
         "time_slots": time_slots,
     }
+    if mixed:
+        for field in ('finished_quantity', 'daily_target_quantity', 'current_target_quantity', 'planned_quantity',
+                      'worker_count', 'working_hours', 'ironing_delivery_quantity', 'achievement_rate_percent'):
+            result[field] = 0
+        result.update(time_slots=[], plan_start_date=None, plan_shipment_date=None)
+    return result
+
+
+def _shared(entries, field):
+    values = list(dict.fromkeys(str(entry[field] or '').strip() for entry in entries if str(entry[field] or '').strip()))
+    return values[0] if len(values) == 1 else (message('ui.multiple_leaders') if values else '')
