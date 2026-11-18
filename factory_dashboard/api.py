@@ -45,7 +45,41 @@ def _panel_lines(group, line, fallback):
             "Line Group Assignment", fields=["line"],
             filters={"line_group": group, "is_active": 1}, limit_page_length=200,
         )]
-    return [line or fallback]
+    selected_line = line or fallback
+    return [selected_line] if selected_line else []
+
+
+def _screen_selection(config, side, legacy_line=None, legacy_group=None, fallback=None):
+    group = config.get(f"{side}_group")
+    line = config.get(f"{side}_line")
+    if not group and not line:
+        group = config.get(legacy_group) if legacy_group else None
+        line = config.get(legacy_line) if legacy_line else None
+    if group:
+        line = None
+    if not group and not line and fallback:
+        line = fallback
+    return group, line
+
+
+def _validate_panel_scope(group, lines, company, factory):
+    if group:
+        group_doc = frappe.db.get_value(
+            "Line Group", group, ["company", "factory", "is_active"], as_dict=True,
+        )
+        if (not group_doc or group_doc.get("company") != company
+                or group_doc.get("factory") != factory or not group_doc.get("is_active")):
+            _fail("error.selection_scope", frappe.PermissionError)
+        if len(set(lines)) != 2:
+            _fail("error.group_invalid", frappe.PermissionError)
+
+    for line in set(lines):
+        line_doc = frappe.db.get_value(
+            "Production Line", line, ["company", "factory", "is_active"], as_dict=True,
+        )
+        if (not line_doc or line_doc.get("company") != company
+                or line_doc.get("factory") != factory or not line_doc.get("is_active")):
+            _fail("error.selection_scope", frappe.PermissionError)
 
 
 @frappe.whitelist(allow_guest=True, methods=["GET"])
@@ -91,16 +125,28 @@ def display(device_id=None, production_date=None):
         _fail("error.config_missing")
     fallback = (current["home_line"] if current["home_line"] in current["scope_lines"]
                 else current["scope_lines"][0])
-    if config.get("display_mode") == "dual":
+    display_mode = (config.get("display_mode") or "single").strip().lower()
+    if display_mode == "dual":
         panels = [
-            (config.get("left_group"), config.get("left_line") or config.get("primary_line")),
-            (config.get("right_group"), config.get("right_line") or config.get("secondary_line")),
+            _screen_selection(config, "left", legacy_line="primary_line"),
+            _screen_selection(config, "right", legacy_line="secondary_line"),
         ]
+        if any(not group and not line for group, line in panels):
+            _fail("error.dual_required")
     else:
-        panels = [(config.get("single_group"), config.get("primary_line"))]
+        display_mode = "single"
+        panels = [
+            _screen_selection(
+                config, "left", legacy_line="primary_line", legacy_group="single_group", fallback=fallback,
+            )
+        ]
     selected = [_panel_lines(group, line, fallback) for group, line in panels]
-    if any(not lines or any(line not in current["scope_lines"] for line in lines) for lines in selected):
+    if any(not lines for lines in selected):
         _fail("error.scope", frappe.PermissionError)
+    for (group, _), lines in zip(panels, selected):
+        _validate_panel_scope(group, lines, current["company"], current["factory"])
+    if display_mode == "dual" and set(selected[0]).intersection(selected[1]):
+        _fail("error.dual_overlap", frappe.PermissionError)
     day = _date(production_date)
     mode, refresh_seconds = _settings()
     rows = []
@@ -109,4 +155,4 @@ def display(device_id=None, production_date=None):
         rows.append(panel_summary(lines, label, day, mode))
     return {"production_date": day, "defect_rate_mode": mode,
             "refresh_seconds": refresh_seconds,
-            "display_mode": config.get("display_mode") or "single", "lines": rows}
+            "display_mode": display_mode, "lines": rows}

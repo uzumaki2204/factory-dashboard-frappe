@@ -31,6 +31,12 @@ frappe.PermissionError = PermissionError
 frappe.DoesNotExistError = LookupError
 frappe.throw = lambda text, error=ValueError: (_ for _ in ()).throw(error(text))
 frappe.whitelist = lambda **kwargs: lambda fn: fn
+frappe_model = types.ModuleType('frappe.model')
+frappe_document = types.ModuleType('frappe.model.document')
+frappe_document.Document = type('Document', (), {})
+frappe_model.document = frappe_document
+sys.modules['frappe.model'] = frappe_model
+sys.modules['frappe.model.document'] = frappe_document
 sys.modules['frappe'] = frappe
 master = types.ModuleType('factory_management.api')
 master._time_zone = lambda: ZONE
@@ -44,6 +50,22 @@ productivity.scope_lines = lambda device: ['L1', 'L2']
 sys.modules.setdefault('factory_productivity', types.ModuleType('factory_productivity'))
 sys.modules['factory_productivity.api'] = productivity
 from factory_dashboard import metrics, api
+from factory_dashboard.factory_dashboard.doctype.productivity_dashboard_device_config.productivity_dashboard_device_config import (
+    ProductivityDashboardDeviceConfig,
+)
+from factory_dashboard.patches import migrate_device_config_screens
+
+
+def make_device_config(**values):
+    document = object.__new__(ProductivityDashboardDeviceConfig)
+    defaults = dict(
+        device='DEV', display_mode='single', left_line=None, left_group=None,
+        right_line=None, right_group=None, primary_line=None,
+        secondary_line=None, single_group=None,
+    )
+    for key, value in {**defaults, **values}.items():
+        setattr(document, key, value)
+    return document
 
 
 class ParityTests(unittest.TestCase):
@@ -143,13 +165,158 @@ class ParityTests(unittest.TestCase):
         self.assertEqual(80,row['achievement_rate_percent'])
 
     def test_display_defaults_to_home_line_and_dual_keeps_left_right(self):
-        current=dict(config={},home_line='L2',scope_lines=['L1','L2'])
-        with patch.object(api,'profile',return_value=current),patch.object(api,'_settings',return_value=('qc_input',60)),patch.object(api,'panel_summary',side_effect=lambda lines,*args:{'source_lines':lines}):
+        current=dict(config={},home_line='L2',scope_lines=['L1','L2'],company='C',factory='F')
+        with patch.object(api,'profile',return_value=current),patch.object(api,'_settings',return_value=('qc_input',60)),patch.object(api,'panel_summary',side_effect=lambda lines,*args:{'source_lines':lines}),patch.object(api,'_validate_panel_scope'):
             self.assertEqual([{'source_lines':['L2']}],api.display('DEV','2026-11-17')['lines'])
             current['config']=dict(display_mode='dual',left_line='L1',right_line='L2')
             self.assertEqual([{'source_lines':['L1']},{'source_lines':['L2']}],api.display('DEV','2026-11-17')['lines'])
-            current['config']['right_line']='OUTSIDE'
+            current['config']['right_line']='L1'
             with self.assertRaises(PermissionError): api.display('DEV','2026-11-17')
+
+    def test_display_single_uses_left_selection_and_ignores_right_backup(self):
+        current = dict(
+            config=dict(display_mode='single', left_line='L3', right_line='L2', primary_line='L1', single_group='G1'),
+            home_line='L1', scope_lines=['L1', 'L2'], company='C', factory='F',
+        )
+        with patch.object(api, 'profile', return_value=current), \
+                patch.object(api, '_settings', return_value=('qc_input', 60)), \
+                patch.object(api, 'panel_summary', side_effect=lambda lines, *args: {'source_lines': lines}), \
+                patch.object(api, '_validate_panel_scope'):
+            result = api.display('DEV', '2026-11-17')
+
+        self.assertEqual('single', result['display_mode'])
+        self.assertEqual([{'source_lines': ['L3']}], result['lines'])
+
+    def test_display_single_backfills_legacy_primary_line(self):
+        current = dict(
+            config=dict(display_mode='single', primary_line='L2'),
+            home_line='L1', scope_lines=['L1', 'L2'], company='C', factory='F',
+        )
+        with patch.object(api, 'profile', return_value=current), \
+                patch.object(api, '_settings', return_value=('qc_input', 60)), \
+                patch.object(api, 'panel_summary', side_effect=lambda lines, *args: {'source_lines': lines}), \
+                patch.object(api, '_validate_panel_scope'):
+            result = api.display('DEV', '2026-11-17')
+
+        self.assertEqual([{'source_lines': ['L2']}], result['lines'])
+
+    def test_display_single_uses_left_group_as_one_combined_panel(self):
+        current = dict(
+            config=dict(display_mode='single', left_group='G1', right_line='L3'),
+            home_line='L1', scope_lines=['L1', 'L2'], company='C', factory='F',
+        )
+        frappe.get_all.return_value = [Row(line='L1'), Row(line='L2')]
+        frappe.db.get_value.return_value = 'G1'
+        with patch.object(api, 'profile', return_value=current), \
+                patch.object(api, '_settings', return_value=('qc_input', 60)), \
+                patch.object(api, 'panel_summary', side_effect=lambda lines, *args: {'source_lines': lines}), \
+                patch.object(api, '_validate_panel_scope'):
+            result = api.display('DEV', '2026-11-17')
+
+        self.assertEqual([{'source_lines': ['L1', 'L2']}], result['lines'])
+
+    def test_display_allows_active_same_factory_line_outside_legacy_device_pair(self):
+        current = dict(
+            config=dict(display_mode='single', left_line='L3'),
+            home_line='L1', scope_lines=['L1', 'L2'], company='C', factory='F',
+        )
+        with patch.object(api, 'profile', return_value=current), \
+                patch.object(api, '_settings', return_value=('qc_input', 60)), \
+                patch.object(api, 'panel_summary', side_effect=lambda lines, *args: {'source_lines': lines}), \
+                patch.object(api, '_validate_panel_scope'):
+            result = api.display('DEV', '2026-11-17')
+
+        self.assertEqual([{'source_lines': ['L3']}], result['lines'])
+
+    def test_display_dual_requires_both_screens(self):
+        current = dict(
+            config=dict(display_mode='dual', left_line='L1'),
+            home_line='L1', scope_lines=['L1', 'L2'], company='C', factory='F',
+        )
+        with patch.object(api, 'profile', return_value=current):
+            with self.assertRaises(ValueError):
+                api.display('DEV', '2026-11-17')
+
+    def test_validate_panel_scope_accepts_only_active_rows_from_same_factory(self):
+        def get_value(doctype, name, fields=None, as_dict=False):
+            if doctype == 'Line Group':
+                return Row(company='C', factory='F', is_active=1)
+            return Row(
+                company='C', factory='OTHER' if name == 'OUTSIDE' else 'F',
+                is_active=0 if name == 'INACTIVE' else 1,
+            )
+
+        frappe.db.get_value.side_effect = get_value
+        api._validate_panel_scope(None, ['L3'], 'C', 'F')
+        with self.assertRaises(PermissionError):
+            api._validate_panel_scope(None, ['OUTSIDE'], 'C', 'F')
+        with self.assertRaises(PermissionError):
+            api._validate_panel_scope(None, ['INACTIVE'], 'C', 'F')
+
+    def test_device_config_requires_left_and_distinct_dual_panels(self):
+        def get_value(doctype, name, fields=None, as_dict=False):
+            if doctype == 'Factory Device':
+                return Row(company='C', factory='F')
+            return Row(company='C', factory='F', is_active=1)
+
+        frappe.db.get_value.side_effect = get_value
+        make_device_config(display_mode='single', left_line='L1', right_line='L2').validate()
+
+        with self.assertRaises(ValueError):
+            make_device_config(display_mode='single').validate()
+        with self.assertRaises(ValueError):
+            make_device_config(display_mode='dual', left_line='L1').validate()
+        with self.assertRaises(ValueError):
+            make_device_config(display_mode='dual', left_line='L1', right_line='L1').validate()
+
+    def test_device_config_rejects_two_selection_types_on_one_screen(self):
+        def get_value(doctype, name, fields=None, as_dict=False):
+            if doctype == 'Factory Device':
+                return Row(company='C', factory='F')
+            return Row(company='C', factory='F', is_active=1)
+
+        frappe.db.get_value.side_effect = get_value
+        with self.assertRaises(ValueError):
+            make_device_config(left_line='L1', left_group='G').validate()
+
+    def test_device_config_accepts_valid_groups_and_rejects_invalid_or_overlapping_groups(self):
+        def get_value(doctype, name, fields=None, as_dict=False):
+            if doctype == 'Factory Device':
+                return Row(company='C', factory='F')
+            return Row(company='C', factory='F', is_active=1)
+
+        frappe.db.get_value.side_effect = get_value
+        frappe.get_all.return_value = [Row(line='L1'), Row(line='L2')]
+        make_device_config(left_group='G1').validate()
+        with self.assertRaises(ValueError):
+            make_device_config(display_mode='dual', left_group='G1', right_line='L2').validate()
+
+        frappe.get_all.return_value = [Row(line='L1')]
+        with self.assertRaises(ValueError):
+            make_device_config(left_group='G1').validate()
+
+    def test_device_config_migration_preserves_selections_and_maps_legacy_fields(self):
+        frappe.get_all.return_value = [
+            Row(name='SINGLE', display_mode='single', left_line=None, left_group=None,
+                right_line=None, right_group=None, primary_line='L1', secondary_line=None, single_group=None),
+            Row(name='GROUP', display_mode='single', left_line=None, left_group=None,
+                right_line=None, right_group=None, primary_line='L1', secondary_line=None, single_group='G1'),
+            Row(name='DUAL', display_mode='dual', left_line=None, left_group=None,
+                right_line=None, right_group=None, primary_line='L1', secondary_line='L2', single_group=None),
+            Row(name='EXISTING', display_mode='dual', left_line='L3', left_group=None,
+                right_line=None, right_group=None, primary_line='L1', secondary_line='L2', single_group=None),
+            Row(name='GROUP_PRECEDENCE', display_mode='single', left_line='L1', left_group='G1',
+                right_line=None, right_group=None, primary_line=None, secondary_line=None, single_group=None),
+        ]
+
+        migrate_device_config_screens.execute()
+
+        updates = {call.args[1]: call.args[2] for call in frappe.db.set_value.call_args_list}
+        self.assertEqual({'left_line': 'L1'}, updates['SINGLE'])
+        self.assertEqual({'left_group': 'G1'}, updates['GROUP'])
+        self.assertEqual({'left_line': 'L1', 'right_line': 'L2'}, updates['DUAL'])
+        self.assertEqual({'right_line': 'L2'}, updates['EXISTING'])
+        self.assertEqual({'left_line': None}, updates['GROUP_PRECEDENCE'])
 
     def test_full_line_payload_uses_raw_report_slots_plan_and_qc_events(self):
         plan=Row(name='PLAN',product='P',line_start_date='2026-11-10',shipment_date='2026-11-25',closed_production_date='2026-11-21',planned_quantity=450)

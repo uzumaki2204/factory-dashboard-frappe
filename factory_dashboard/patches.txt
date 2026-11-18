@@ -3,3 +3,4 @@
 [post_model_sync]
 factory_dashboard.patches.ensure_defaults
 factory_dashboard.patches.normalize_defect_source
+factory_dashboard.patches.migrate_device_config_screens

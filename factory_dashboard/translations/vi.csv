@@ -15,3 +15,16 @@ Display Mode,Chế độ hiển thị
 Primary Line,Chuyền chính
 Secondary Line,Chuyền phụ
 Single Group,Nhóm chuyền một màn hình
+Left Screen,Màn hình trái
+Right Screen,Màn hình phải
+Production Line,Chuyền sản xuất
+Line Group,Nhóm chuyền
+Legacy Configuration,Cấu hình cũ
+single,Một màn hình
+dual,Hai màn hình
+Select one production line or one line group for the left screen.,Chọn một chuyền hoặc một nhóm chuyền cho màn hình trái.
+This selection is a backup in single mode and is used in dual mode.,Cấu hình này là dự phòng ở chế độ một màn hình và được dùng ở chế độ hai màn hình.
+The left screen is used in dual mode.,Màn hình trái được sử dụng ở chế độ hai màn hình.
+The left screen is used in single mode.,Màn hình trái được sử dụng ở chế độ một màn hình.
+The right screen is used in dual mode.,Màn hình phải được sử dụng ở chế độ hai màn hình.
+This selection is a backup and is not shown in single mode.,Cấu hình này là dự phòng và không hiển thị ở chế độ một màn hình.

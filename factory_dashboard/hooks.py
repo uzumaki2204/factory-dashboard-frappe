@@ -17,3 +17,6 @@ add_to_apps_screen = [{
 before_install = "factory_dashboard.install.before_install"
 after_install = "factory_dashboard.install.after_migrate"
 after_migrate = "factory_dashboard.install.after_migrate"
+doctype_js = {
+    "Productivity Dashboard Device Config": "public/js/productivity_dashboard_device_config.js",
+}
