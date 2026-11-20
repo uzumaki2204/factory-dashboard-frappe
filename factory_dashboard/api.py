@@ -62,16 +62,16 @@ def _screen_selection(config, side, legacy_line=None, legacy_group=None, fallbac
     return group, line
 
 
-def _validate_panel_scope(group, lines, company, factory):
+def _panel_scope_error(group, lines, company, factory):
     if group:
         group_doc = frappe.db.get_value(
             "Line Group", group, ["company", "factory", "is_active"], as_dict=True,
         )
         if (not group_doc or group_doc.get("company") != company
                 or group_doc.get("factory") != factory or not group_doc.get("is_active")):
-            _fail("error.selection_scope", frappe.PermissionError)
+            return "error.selection_scope"
         if len(set(lines)) != 2:
-            _fail("error.group_invalid", frappe.PermissionError)
+            return "error.group_invalid"
 
     for line in set(lines):
         line_doc = frappe.db.get_value(
@@ -79,7 +79,14 @@ def _validate_panel_scope(group, lines, company, factory):
         )
         if (not line_doc or line_doc.get("company") != company
                 or line_doc.get("factory") != factory or not line_doc.get("is_active")):
-            _fail("error.selection_scope", frappe.PermissionError)
+            return "error.selection_scope"
+    return None
+
+
+def _validate_panel_scope(group, lines, company, factory):
+    error = _panel_scope_error(group, lines, company, factory)
+    if error:
+        _fail(error, frappe.PermissionError)
 
 
 @frappe.whitelist(allow_guest=True, methods=["GET"])
@@ -93,8 +100,13 @@ def profile(device_id=None):
     device = _device(device_id)
     config = frappe.db.get_value("Productivity Dashboard Device Config", {"device": device.name}, "name")
     values = frappe.get_doc("Productivity Dashboard Device Config", config).as_dict() if config else {}
+    home_line = frappe.db.get_value(
+        "Production Line", device.line, ["line_code", "line_name"], as_dict=True,
+    ) if device.line else None
     return {"device": device.name, "company": device.company, "factory": device.factory,
-            "home_line": device.line,
+            "device_name": device.device_name or device.name, "home_line": device.line,
+            "home_line_code": home_line.get("line_code") if home_line else device.line,
+            "home_line_name": home_line.get("line_name") if home_line else None,
             "scope_lines": [line for line in scope_lines(device) if line], "config": values}
 
 
@@ -118,19 +130,30 @@ def summary(device_id=None, production_date=None, lines=None):
 
 
 @frappe.whitelist(allow_guest=True, methods=["GET"])
-def display(device_id=None, production_date=None):
+def display(device_id=None, production_date=None, mode=None):
     current = profile(device_id)
     config = current["config"]
     if not current["scope_lines"]:
         _fail("error.config_missing")
     fallback = (current["home_line"] if current["home_line"] in current["scope_lines"]
                 else current["scope_lines"][0])
-    display_mode = (config.get("display_mode") or "single").strip().lower()
+    requested_mode = str(mode).strip().lower() if mode is not None else None
+    if requested_mode is not None and requested_mode not in ("single", "dual"):
+        _fail("error.mode_invalid")
+    left = _screen_selection(config, "left", legacy_line="primary_line")
+    right = _screen_selection(config, "right", legacy_line="secondary_line")
+    dual_lines = [_panel_lines(group, line, None) for group, line in (left, right)]
+    supports_dual = all(group or line for group, line in (left, right)) and all(
+        lines and not _panel_scope_error(group, lines, current["company"], current["factory"])
+        for (group, _), lines in zip((left, right), dual_lines)
+    ) and not set(dual_lines[0]).intersection(dual_lines[1])
+    supported_modes = ["single", "dual"] if supports_dual else ["single"]
+    configured_mode = (config.get("display_mode") or "single").strip().lower()
+    display_mode = requested_mode or configured_mode
+    if requested_mode == "dual" and not supports_dual:
+        display_mode = "single"
     if display_mode == "dual":
-        panels = [
-            _screen_selection(config, "left", legacy_line="primary_line"),
-            _screen_selection(config, "right", legacy_line="secondary_line"),
-        ]
+        panels = [left, right]
         if any(not group and not line for group, line in panels):
             _fail("error.dual_required")
     else:
@@ -155,4 +178,9 @@ def display(device_id=None, production_date=None):
         rows.append(panel_summary(lines, label, day, mode))
     return {"production_date": day, "defect_rate_mode": mode,
             "refresh_seconds": refresh_seconds,
-            "display_mode": display_mode, "lines": rows}
+            "display_mode": display_mode, "supported_modes": supported_modes,
+            "device": {"id": current.get("device") or device_id,
+                       "name": current.get("device_name") or current.get("device") or device_id,
+                       "registered_line_code": current.get("home_line_code") or current.get("home_line"),
+                       "registered_line_name": current.get("home_line_name")},
+            "lines": rows}

@@ -49,7 +49,14 @@ body[data-path="productivity-dashboard-tv"] {
     cursor: pointer;
 }
 
-.dashboard-tv-edge-right .dashboard-tv-edge-trigger { border-radius: 8px 0 0 8px; }
+.dashboard-tv-edge-right { width: 44px; }
+.dashboard-tv-edge-right .dashboard-tv-edge-trigger {
+    width: 44px;
+    height: 48px;
+    border-radius: 8px 0 0 8px;
+    opacity: .55;
+    font-size: 20px;
+}
 .dashboard-tv-edge:hover .dashboard-tv-edge-trigger,
 .dashboard-tv-edge:focus-within .dashboard-tv-edge-trigger { opacity: .8; }
 
@@ -69,6 +76,132 @@ body[data-path="productivity-dashboard-tv"] {
     padding: 8px 12px;
     opacity: 1;
     pointer-events: auto;
+}
+
+.dashboard-tv-device-backdrop,
+.dashboard-tv-device-drawer {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+}
+
+.dashboard-tv-device-backdrop[hidden],
+.dashboard-tv-device-drawer[hidden] { display: none !important; }
+
+body.dashboard-tv-drawer-open { overflow: hidden !important; }
+
+.dashboard-tv-device-backdrop {
+    inset: 0;
+    z-index: 40;
+    background: rgb(12 28 47 / 38%);
+}
+
+.dashboard-tv-device-drawer {
+    box-sizing: border-box;
+    right: 0;
+    z-index: 41;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    width: min(390px, 100vw);
+    height: 100vh;
+    height: 100dvh;
+    padding: 22px;
+    overflow-y: auto;
+    background: #f4f7fb;
+    box-shadow: -8px 0 28px rgb(12 28 47 / 18%);
+}
+
+.dashboard-tv-drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.dashboard-tv-drawer-header h2 {
+    margin: 0;
+    color: #0a182d;
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.dashboard-tv-drawer-close {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    background: transparent;
+    color: #0a182d;
+    font-size: 28px;
+    cursor: pointer;
+}
+
+.dashboard-tv-device-info {
+    display: grid;
+    gap: 10px;
+}
+
+.dashboard-tv-device-info > div {
+    display: grid;
+    gap: 5px;
+    padding: 13px 15px;
+    border: 1px solid #d2dcea;
+    background: #fff;
+}
+
+.dashboard-tv-device-info span {
+    color: #506a90;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.dashboard-tv-device-info strong {
+    overflow-wrap: anywhere;
+    font-size: 16px;
+}
+
+.dashboard-tv-mode-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.dashboard-tv-mode-actions button,
+.dashboard-tv-reset-button {
+    min-height: 46px;
+    border: 1px solid #9fb2ce;
+    background: #fff;
+    color: #173058;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.dashboard-tv-mode-actions button[aria-pressed="true"] {
+    border-color: #3e6fd6;
+    background: #eaf3ff;
+    color: #173058;
+}
+
+.dashboard-tv-mode-actions button:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+.dashboard-tv-mode-status {
+    min-height: 1.3em;
+    color: #a23b29;
+    font-size: 13px;
+}
+
+.dashboard-tv-reset-button { margin-top: auto; }
+
+.dashboard-tv-device-drawer button:focus-visible,
+.dashboard-tv-edge-trigger:focus-visible {
+    outline: 3px solid #3e6fd6;
+    outline-offset: 2px;
 }
 
 .dashboard-tv-live-status {
@@ -219,17 +352,6 @@ body[data-path="productivity-dashboard-tv"] {
 
 .dashboard-tv-kpi-value-green {
     color: #05a84f;
-}
-
-.dashboard-tv-data-note {
-    flex: 0 0 auto;
-    padding: 5px 12px;
-    border-bottom: 1px solid #d2dcea;
-    background: #fff7e9;
-    color: #925d14;
-    font-size: 13px;
-    font-weight: 700;
-    text-align: center;
 }
 
 .dashboard-tv-slots {
@@ -397,6 +519,7 @@ body[data-path="productivity-dashboard-tv"] {
     .dashboard-tv-panels-dual { grid-template-columns: 1fr; }
     .dashboard-tv-board { min-height: 760px; }
     .dashboard-tv-edge { min-height: 80px; width: 24px; }
+    .dashboard-tv-edge-right { width: 44px; }
     .dashboard-tv-edge:focus-within { width: max-content; }
 }
 

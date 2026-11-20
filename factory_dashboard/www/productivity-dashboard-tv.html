@@ -9,8 +9,26 @@
     <button id="fullscreen-button" class="btn btn-primary dashboard-tv-edge-button" type="button" title="{{ texts['ui.fullscreen'] }}" aria-label="{{ texts['ui.fullscreen'] }}">{{ texts['ui.fullscreen'] }}</button>
   </aside>
   <aside class="dashboard-tv-edge dashboard-tv-edge-right" aria-label="{{ texts['ui.tv_controls'] }}">
-    <button class="dashboard-tv-edge-trigger" type="button" aria-label="{{ texts['ui.reveal_controls'] }}">⋮</button>
-    <button id="reset-device-button" class="btn btn-default dashboard-tv-edge-button" type="button" title="{{ texts['ui.reset_device'] }}" aria-label="{{ texts['ui.reset_device'] }}">{{ texts['ui.reset_device'] }}</button>
+    <button id="device-panel-button" class="dashboard-tv-edge-trigger" type="button" aria-label="{{ texts['ui.device_panel'] }}" aria-controls="dashboard-device-drawer" aria-expanded="false">⚙</button>
+  </aside>
+  <div id="dashboard-device-backdrop" class="dashboard-tv-device-backdrop" hidden></div>
+  <aside id="dashboard-device-drawer" class="dashboard-tv-device-drawer" role="dialog" aria-modal="true" aria-labelledby="dashboard-device-title" hidden>
+    <header class="dashboard-tv-drawer-header">
+      <h2 id="dashboard-device-title">{{ texts['ui.device_panel'] }}</h2>
+      <button id="device-panel-close" class="dashboard-tv-drawer-close" type="button" aria-label="{{ texts['ui.close'] }}">×</button>
+    </header>
+    <div class="dashboard-tv-device-info">
+      <div><span>{{ texts['ui.device_name'] }}</span><strong id="dashboard-device-name">{{ texts['ui.no_value'] }}</strong></div>
+      <div><span>{{ texts['ui.device_code'] }}</span><strong id="dashboard-device-code">{{ texts['ui.no_value'] }}</strong></div>
+      <div><span>{{ texts['ui.registered_line'] }}</span><strong id="dashboard-device-line">{{ texts['ui.no_value'] }}</strong></div>
+      <div><span>{{ texts['ui.supported_modes'] }}</span><strong id="dashboard-device-modes">{{ texts['ui.no_value'] }}</strong></div>
+    </div>
+    <div class="dashboard-tv-mode-actions" role="group" aria-label="{{ texts['ui.mode_change'] }}">
+      <button id="dashboard-mode-single" type="button" data-mode="single" aria-pressed="false">{{ texts['ui.mode_single'] }}</button>
+      <button id="dashboard-mode-dual" type="button" data-mode="dual" aria-pressed="false">{{ texts['ui.mode_dual'] }}</button>
+    </div>
+    <div id="dashboard-mode-status" class="dashboard-tv-mode-status" role="status" aria-live="polite"></div>
+    <button id="reset-device-button" class="dashboard-tv-reset-button" type="button">{{ texts['ui.reset_device'] }}</button>
   </aside>
   <div class="dashboard-tv-live-status" aria-live="polite">
     <span id="dashboard-date"></span><span id="dashboard-source"></span>

@@ -173,6 +173,34 @@ class ParityTests(unittest.TestCase):
             current['config']['right_line']='L1'
             with self.assertRaises(PermissionError): api.display('DEV','2026-11-17')
 
+    def test_tv_mode_override_is_read_only_and_falls_back_when_dual_is_unavailable(self):
+        current = dict(
+            device='DEV', device_name='TV A', home_line='L1', home_line_code='401',
+            home_line_name='C1X1', scope_lines=['L1', 'L2'], company='C', factory='F',
+            config=dict(display_mode='single', left_line='L1', right_line='L2'),
+        )
+        with patch.object(api, 'profile', return_value=current), \
+                patch.object(api, '_settings', return_value=('qc_input', 60)), \
+                patch.object(api, '_panel_scope_error', return_value=None), \
+                patch.object(api, '_validate_panel_scope'), \
+                patch.object(api, 'panel_summary', side_effect=lambda lines, *args: {'source_lines': lines}):
+            dual = api.display('DEV', '2026-11-17', mode='dual')
+            self.assertEqual('dual', dual['display_mode'])
+            self.assertEqual(['single', 'dual'], dual['supported_modes'])
+            self.assertEqual([{'source_lines': ['L1']}, {'source_lines': ['L2']}], dual['lines'])
+            self.assertEqual('TV A', dual['device']['name'])
+            self.assertEqual('single', current['config']['display_mode'])
+
+            current['config']['right_line'] = None
+            fallback = api.display('DEV', '2026-11-17', mode='dual')
+            self.assertEqual('single', fallback['display_mode'])
+            self.assertEqual(['single'], fallback['supported_modes'])
+            self.assertEqual([{'source_lines': ['L1']}], fallback['lines'])
+            with self.assertRaises(ValueError):
+                api.display('DEV', '2026-11-17', mode='unknown')
+
+        frappe.db.set_value.assert_not_called()
+
     def test_display_single_uses_left_selection_and_ignores_right_backup(self):
         current = dict(
             config=dict(display_mode='single', left_line='L3', right_line='L2', primary_line='L1', single_group='G1'),
@@ -206,7 +234,9 @@ class ParityTests(unittest.TestCase):
             home_line='L1', scope_lines=['L1', 'L2'], company='C', factory='F',
         )
         frappe.get_all.return_value = [Row(line='L1'), Row(line='L2')]
-        frappe.db.get_value.return_value = 'G1'
+        frappe.db.get_value.side_effect = lambda doctype, name, fields=None, as_dict=False: (
+            'G1' if fields == 'group_name' else Row(company='C', factory='F', is_active=1)
+        )
         with patch.object(api, 'profile', return_value=current), \
                 patch.object(api, '_settings', return_value=('qc_input', 60)), \
                 patch.object(api, 'panel_summary', side_effect=lambda lines, *args: {'source_lines': lines}), \
@@ -236,6 +266,11 @@ class ParityTests(unittest.TestCase):
         with patch.object(api, 'profile', return_value=current):
             with self.assertRaises(ValueError):
                 api.display('DEV', '2026-11-17')
+        with patch.object(api, 'profile', return_value=current), \
+                patch.object(api, '_settings', return_value=('qc_input', 60)), \
+                patch.object(api, '_validate_panel_scope'), \
+                patch.object(api, 'panel_summary', side_effect=lambda lines, *args: {'source_lines': lines}):
+            self.assertEqual('single', api.display('DEV', '2026-11-17', mode='single')['display_mode'])
 
     def test_validate_panel_scope_accepts_only_active_rows_from_same_factory(self):
         def get_value(doctype, name, fields=None, as_dict=False):

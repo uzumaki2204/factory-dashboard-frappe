@@ -9,6 +9,12 @@
     const form = document.getElementById('dashboard-device-form');
     const params = new URLSearchParams(window.location.search);
     const deviceId = (params.get('device_id') || '').trim();
+    const modeStorageKey = `factoryDashboardMode:${deviceId}`;
+    const drawer = document.getElementById('dashboard-device-drawer');
+    const backdrop = document.getElementById('dashboard-device-backdrop');
+    const panelButton = document.getElementById('device-panel-button');
+    const modeStatus = document.getElementById('dashboard-mode-status');
+    const modeButtons = ['single', 'dual'].map(mode => document.getElementById(`dashboard-mode-${mode}`));
     const number = value => new Intl.NumberFormat(root.dataset.lang || 'vi').format(Number(value) || 0);
     const percent = value => {
         const numeric = Number(value) || 0;
@@ -16,6 +22,28 @@
         return `${numeric.toFixed(decimals)}%`;
     };
     let timer;
+    let requestSequence = 0;
+    let activeDevice = Boolean(deviceId);
+    let selectedMode = readSavedMode();
+    let currentMode = null;
+
+    function readSavedMode() {
+        try {
+            const value = window.localStorage.getItem(modeStorageKey);
+            return value === 'single' || value === 'dual' ? value : null;
+        } catch (_) {
+            return null;
+        }
+    }
+
+    function saveMode(mode) {
+        try {
+            if (mode) window.localStorage.setItem(modeStorageKey, mode);
+            else window.localStorage.removeItem(modeStorageKey);
+        } catch (_) {
+            // The current page can still switch modes when storage is unavailable.
+        }
+    }
 
     function element(tag, className, value) {
         const node = document.createElement(tag);
@@ -50,8 +78,10 @@
         const detail = element('div', 'dashboard-tv-line-detail');
         detail.append(element('strong', '', row.line_code || row.line_name || row.line));
         detail.append(element('span', '', row.product_code || t('ui.no_value')));
-        detail.append(element('span', '', `${t('ui.defects')}: ${number(row.defect_quantity)}`));
-        detail.append(element('span', '', `${t('ui.defect_rate')}: ${row.has_defect_rate ? percent(row.defect_rate_percent) : t('ui.no_value')}`));
+        if (Number(row.report_count) > 0 && Number(row.qc_total_quantity) > 0) {
+            detail.append(element('span', '', `${t('ui.defects')}: ${number(row.defect_quantity)}`));
+            detail.append(element('span', '', `${t('ui.defect_rate')}: ${row.has_defect_rate ? percent(row.defect_rate_percent) : t('ui.no_value')}`));
+        }
         return detail;
     }
 
@@ -118,9 +148,6 @@
         kpis.append(kpi(t('ui.current_target'), number(row.current_target_quantity), 'blue'));
         kpis.append(kpi(t('ui.achievement'), percent(row.achievement_rate_percent), 'green'));
         board.append(kpis);
-        if (!row.report_count || !row.has_defect_rate) {
-            board.append(element('div', 'dashboard-tv-data-note', !row.report_count ? t('ui.no_report') : row.defect_rate_unavailable_reason || t('ui.no_quality_data')));
-        }
         if (row.mixed_products) {
             const details = element('div', 'dashboard-tv-line-details');
             row.line_details.forEach(detail => details.append(lineDetail(detail)));
@@ -130,7 +157,25 @@
         return board;
     }
 
-    async function load() {
+    function renderDevice(data) {
+        const device = data.device || {};
+        document.getElementById('dashboard-device-name').textContent = device.name || t('ui.no_value');
+        document.getElementById('dashboard-device-code').textContent = device.id || deviceId;
+        document.getElementById('dashboard-device-line').textContent =
+            [device.registered_line_code, device.registered_line_name].filter(Boolean).join(' - ') || t('ui.no_value');
+        const supported = Array.isArray(data.supported_modes) ? data.supported_modes : [data.display_mode];
+        document.getElementById('dashboard-device-modes').textContent = supported.map(mode => t(`ui.mode_${mode}`)).join(' / ');
+        currentMode = data.display_mode;
+        modeButtons.forEach(button => {
+            const mode = button.dataset.mode;
+            button.disabled = !supported.includes(mode);
+            button.setAttribute('aria-pressed', String(mode === currentMode));
+            button.title = button.disabled ? t('ui.mode_unavailable') : '';
+        });
+    }
+
+    async function load(requestedMode = selectedMode, commitMode = false) {
+        const request = ++requestSequence;
         clearTimeout(timer);
         status.textContent = t('ui.loading');
         let failure = t('ui.error');
@@ -138,27 +183,62 @@
             const url = new URL('/api/method/factory_dashboard.api.display', window.location.origin);
             url.searchParams.set('device_id', deviceId);
             url.searchParams.set('lang', root.dataset.lang || 'vi');
+            if (requestedMode) url.searchParams.set('mode', requestedMode);
             const response = await fetch(url, { credentials: 'same-origin', cache: 'no-store' });
             const body = await response.json();
+            if (request !== requestSequence) return;
             if (!response.ok) {
                 failure = serverMessage(body) || failure;
                 throw new Error(failure);
             }
             const data = body.message;
             if (!data || !Array.isArray(data.lines)) throw new Error(failure);
+            modeStatus.textContent = '';
+            if (requestedMode && data.display_mode !== requestedMode) {
+                if (commitMode) modeStatus.textContent = t('ui.mode_unavailable');
+                else {
+                    selectedMode = null;
+                    saveMode(null);
+                }
+            } else if (commitMode) {
+                selectedMode = requestedMode;
+                saveMode(selectedMode);
+                modeStatus.textContent = '';
+            }
             panels.replaceChildren(...data.lines.map(renderPanel));
             updateClock();
             panels.classList.toggle('dashboard-tv-panels-dual', data.display_mode === 'dual');
+            renderDevice(data);
             document.getElementById('dashboard-date').textContent = displayDate(data.production_date);
             document.getElementById('dashboard-source').textContent = `${t('ui.source')}: ${t(data.defect_rate_mode === 'uqqc_input' ? 'ui.uqqc_source' : 'ui.qc_source')}`;
             document.getElementById('dashboard-updated').textContent = `${t('ui.last_updated')}: ${new Date().toLocaleString(root.dataset.lang || 'vi')}`;
             status.textContent = t('ui.status_online');
-            timer = setTimeout(load, Math.max(10, Number(data.refresh_seconds) || 60) * 1000);
+            timer = setTimeout(() => load(), Math.max(10, Number(data.refresh_seconds) || 60) * 1000);
         } catch (_) {
-            panels.replaceChildren();
+            if (request !== requestSequence) return;
+            if (commitMode) modeStatus.textContent = failure || t('ui.mode_switch_failed');
+            else panels.replaceChildren();
             status.textContent = failure;
-            timer = setTimeout(load, 60000);
+            timer = setTimeout(() => load(), 60000);
         }
+    }
+
+    function closeDrawer() {
+        if (drawer.hidden) return;
+        drawer.hidden = true;
+        backdrop.hidden = true;
+        document.body.classList.remove('dashboard-tv-drawer-open');
+        panelButton.setAttribute('aria-expanded', 'false');
+        panelButton.focus();
+    }
+
+    function openDrawer() {
+        if (!activeDevice) return;
+        drawer.hidden = false;
+        backdrop.hidden = false;
+        document.body.classList.add('dashboard-tv-drawer-open');
+        panelButton.setAttribute('aria-expanded', 'true');
+        document.getElementById('device-panel-close').focus();
     }
 
     form.addEventListener('submit', event => {
@@ -173,12 +253,48 @@
         if (document.fullscreenElement) document.exitFullscreen();
         else document.documentElement.requestFullscreen();
     });
-    document.querySelectorAll('.dashboard-tv-edge-trigger').forEach(trigger => {
+    document.querySelectorAll('.dashboard-tv-edge-left .dashboard-tv-edge-trigger').forEach(trigger => {
         trigger.addEventListener('click', () => trigger.parentElement.classList.toggle('is-open'));
     });
+    panelButton.disabled = !activeDevice;
+    panelButton.addEventListener('click', openDrawer);
+    backdrop.addEventListener('click', closeDrawer);
+    document.getElementById('device-panel-close').addEventListener('click', closeDrawer);
+    drawer.addEventListener('keydown', event => {
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            closeDrawer();
+        } else if (event.key === 'Tab') {
+            const focusable = Array.from(drawer.querySelectorAll('button:not([disabled])'));
+            if (!focusable.length) return;
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        }
+    });
+    modeButtons.forEach(button => {
+        button.disabled = button.dataset.mode !== 'single';
+        button.addEventListener('click', () => {
+            if (button.dataset.mode !== currentMode) load(button.dataset.mode, true);
+        });
+    });
     document.getElementById('reset-device-button').addEventListener('click', () => {
+        requestSequence += 1;
         clearTimeout(timer);
-        window.localStorage.removeItem('factoryDashboardSession');
+        saveMode(null);
+        try { window.localStorage.removeItem('factoryDashboardSession'); } catch (_) { /* Storage is optional. */ }
+        selectedMode = null;
+        activeDevice = false;
+        closeDrawer();
+        panelButton.disabled = true;
+        currentMode = null;
+        modeButtons.forEach(button => { button.disabled = true; button.setAttribute('aria-pressed', 'false'); });
         const url = new URL(window.location.href);
         url.searchParams.delete('device_id');
         window.history.replaceState({}, '', url);
