@@ -19,6 +19,12 @@ Left Screen,Màn hình trái
 Right Screen,Màn hình phải
 Production Line,Chuyền sản xuất
 Line Group,Nhóm chuyền
+Displayed Line Configuration,Cấu hình chuyền hiển thị
+Select a line or line group,Chọn chuyền hoặc nhóm chuyền
+Select a device first,Vui lòng chọn thiết bị trước
+Loading configurations...,Đang tải cấu hình...
+Could not load line configurations.,Không thể tải danh sách cấu hình chuyền.
+Unavailable,Không khả dụng
 Legacy Configuration,Cấu hình cũ
 single,Một màn hình
 dual,Hai màn hình

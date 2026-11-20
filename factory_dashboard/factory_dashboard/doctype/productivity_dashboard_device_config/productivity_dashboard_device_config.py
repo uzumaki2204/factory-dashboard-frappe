@@ -21,6 +21,57 @@ class ProductivityDashboardDeviceConfig(Document):
             frappe.throw(message("error.dual_overlap"))
 
 
+@frappe.whitelist(methods=["GET"])
+def get_available_selections(device):
+    """Return valid line and two-line group choices for a device's factory."""
+    if not frappe.has_permission("Productivity Dashboard Device Config", "read"):
+        frappe.throw(message("error.permission"), frappe.PermissionError)
+
+    device_scope = frappe.db.get_value(
+        "Factory Device", device, ["company", "factory"], as_dict=True,
+    ) if device else None
+    if not device_scope or not device_scope.company or not device_scope.factory:
+        frappe.throw(message("error.device_missing"))
+
+    filters = {
+        "company": device_scope.company,
+        "factory": device_scope.factory,
+        "is_active": 1,
+    }
+    lines = frappe.get_all(
+        "Production Line", fields=["name", "line_code", "line_name"],
+        filters=filters, order_by="line_code asc", limit_page_length=0,
+    )
+    active_lines = {line.name for line in lines}
+    options = [
+        {"key": f"line:{line.name}", "type": "line", "code": line.line_code, "name": line.line_name}
+        for line in lines
+    ]
+
+    groups = frappe.get_all(
+        "Line Group", fields=["name", "group_code", "group_name"],
+        filters=filters, order_by="group_code asc", limit_page_length=0,
+    )
+    if groups:
+        assignments = frappe.get_all(
+            "Line Group Assignment", fields=["line_group", "line"],
+            filters={"line_group": ["in", [group.name for group in groups]], "is_active": 1},
+            limit_page_length=0,
+        )
+        lines_by_group = {group.name: set() for group in groups}
+        for assignment in assignments:
+            lines_by_group[assignment.line_group].add(assignment.line)
+        for group in groups:
+            selected_lines = lines_by_group[group.name]
+            if len(selected_lines) == 2 and selected_lines.issubset(active_lines):
+                options.append({
+                    "key": f"group:{group.name}", "type": "group",
+                    "code": group.group_code, "name": group.group_name,
+                })
+
+    return options
+
+
 def _validate_screen(document, side, device, required):
     line = getattr(document, f"{side}_line", None)
     group = getattr(document, f"{side}_group", None)

@@ -6,6 +6,6 @@ Independent Frappe 16 app for productivity display. Requires `factory_management
 
 ## Install and update
 
-Install the two required apps first. Add this repository to the bench as app `factory_dashboard`, install it on the target site, then run `bench --site <site> migrate` and `bench build --app factory_dashboard`. Pilot should pull the `version-16` branch and run migrate and build on updates. Post-model-sync patches create the `GLOBAL` settings record, replace retired source modes with `qc_input`, and migrate legacy device selections into Left and Right Screen. Installation does not import historical data.
+Install the two required apps first. Add this repository to the bench as app `factory_dashboard`, install it on the target site, then run `bench --site <site> migrate` and `bench build --app factory_dashboard`. Pilot should pull the `version-16` branch and run migrate and build on updates. Post-model-sync patches create the `GLOBAL` settings record, replace retired source modes with `qc_input`, migrate legacy device selections into Left and Right Screen, and refresh the two-selector device form. Installation does not import historical data.
 
 The manual import workbook can stage device configuration from the .NET Admin API. Existing `Factory Device` and line/group links must be mapped before Data Import.
