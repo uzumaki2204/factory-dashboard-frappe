@@ -49,14 +49,18 @@ body[data-path="productivity-dashboard-tv"] {
     cursor: pointer;
 }
 
-.dashboard-tv-edge-right { width: 44px; }
+.dashboard-tv-edge-right { width: 12px; }
 .dashboard-tv-edge-right .dashboard-tv-edge-trigger {
     width: 44px;
     height: 48px;
     border-radius: 8px 0 0 8px;
-    opacity: .55;
+    opacity: 0;
+    pointer-events: none;
     font-size: 20px;
+    transition: opacity .18s ease;
 }
+.dashboard-tv-edge-right:hover .dashboard-tv-edge-trigger,
+.dashboard-tv-edge-right:focus-within .dashboard-tv-edge-trigger { pointer-events: auto; }
 .dashboard-tv-edge:hover .dashboard-tv-edge-trigger,
 .dashboard-tv-edge:focus-within .dashboard-tv-edge-trigger { opacity: .8; }
 
@@ -502,7 +506,7 @@ body.dashboard-tv-drawer-open { overflow: hidden !important; }
     .dashboard-tv-panels-dual { grid-template-columns: 1fr; }
     .dashboard-tv-board { min-height: 760px; }
     .dashboard-tv-edge { min-height: 80px; width: 24px; }
-    .dashboard-tv-edge-right { width: 44px; }
+    .dashboard-tv-edge-right { width: 12px; }
     .dashboard-tv-edge:focus-within { width: max-content; }
 }
 
@@ -520,5 +524,11 @@ body.dashboard-tv-drawer-open { overflow: hidden !important; }
 @media (hover: none) {
     .dashboard-tv-edge { width: 24px; }
     .dashboard-tv-edge-trigger { width: 24px; opacity: .45; }
+    .dashboard-tv-edge-right { width: 44px; }
+    .dashboard-tv-edge-right .dashboard-tv-edge-trigger {
+        width: 44px;
+        opacity: .55;
+        pointer-events: auto;
+    }
     .dashboard-tv-edge.is-open .dashboard-tv-edge-button { max-width: min(300px, 84vw); padding: 8px 12px; opacity: 1; pointer-events: auto; }
 }
