@@ -200,9 +200,26 @@ body.dashboard-tv-drawer-open { overflow: hidden !important; }
     font-size: 13px;
 }
 
+.dashboard-tv-summary-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 46px;
+    border: 1px solid #3e6fd6;
+    background: #eaf3ff;
+    color: #173058;
+    font-weight: 800;
+    text-align: center;
+    text-decoration: none;
+}
+
+.dashboard-tv-summary-link:hover { background: #dceaff; color: #173058; text-decoration: none; }
+.dashboard-tv-summary-link[hidden] { display: none !important; }
+
 .dashboard-tv-reset-button { margin-top: auto; }
 
 .dashboard-tv-device-drawer button:focus-visible,
+.dashboard-tv-summary-link:focus-visible,
 .dashboard-tv-edge-trigger:focus-visible {
     outline: 3px solid #3e6fd6;
     outline-offset: 2px;

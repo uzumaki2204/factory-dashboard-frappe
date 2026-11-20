@@ -1,9 +1,9 @@
 {
   "app": "factory_dashboard",
-  "version": "0.1.16",
+  "version": "0.1.17",
   "branch": "version-16",
   "frappe": ">=16.53.0,<17.0.0",
   "factory_management": ">=0.1.87,<0.2.0",
   "factory_productivity": ">=0.1.12,<0.2.0",
-  "migration": "no DocType changes; adds the read-only monthly production summary page"
+  "migration": "no DocType changes; moves the production summary link into the TV device drawer"
 }

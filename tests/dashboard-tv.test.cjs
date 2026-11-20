@@ -60,8 +60,8 @@ async function render(lines, mode = 'single', options = {}) {
     for (const node of Object.values(nodes)) node.focus = () => { document.activeElement = node; };
     nodes['dashboard-device-drawer'].querySelectorAll = () => [
         nodes['device-panel-close'], nodes['dashboard-mode-single'],
-        nodes['dashboard-mode-dual'], nodes['reset-device-button'],
-    ].filter(node => !node.disabled);
+        nodes['dashboard-mode-dual'], nodes['summary-page-link'], nodes['reset-device-button'],
+    ].filter(node => !node.disabled && !node.hidden);
     const storage = new Map(Object.entries(options.storage || {}));
     const requests = [];
     const context = {

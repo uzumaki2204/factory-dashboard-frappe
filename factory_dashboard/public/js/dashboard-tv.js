@@ -255,7 +255,7 @@
             event.preventDefault();
             closeDrawer();
         } else if (event.key === 'Tab') {
-            const focusable = Array.from(drawer.querySelectorAll('button:not([disabled])'));
+            const focusable = Array.from(drawer.querySelectorAll('button:not([disabled]), a[href]:not([hidden])'));
             if (!focusable.length) return;
             const first = focusable[0];
             const last = focusable[focusable.length - 1];

@@ -7,7 +7,6 @@
   <aside class="dashboard-tv-edge dashboard-tv-edge-left" aria-label="{{ texts['ui.tv_controls'] }}">
     <button class="dashboard-tv-edge-trigger" type="button" aria-label="{{ texts['ui.reveal_controls'] }}">⋮</button>
     <button id="fullscreen-button" class="btn btn-primary dashboard-tv-edge-button" type="button" title="{{ texts['ui.fullscreen'] }}" aria-label="{{ texts['ui.fullscreen'] }}">{{ texts['ui.fullscreen'] }}</button>
-    <a id="summary-page-link" class="btn btn-primary dashboard-tv-edge-button" href="/productivity-dashboard-summary">{{ texts['ui.summary_page'] }}</a>
   </aside>
   <aside class="dashboard-tv-edge dashboard-tv-edge-right" aria-label="{{ texts['ui.tv_controls'] }}">
     <button id="device-panel-button" class="dashboard-tv-edge-trigger" type="button" aria-label="{{ texts['ui.device_panel'] }}" aria-controls="dashboard-device-drawer" aria-expanded="false">⚙</button>
@@ -29,6 +28,7 @@
       <button id="dashboard-mode-dual" type="button" data-mode="dual" aria-pressed="false">{{ texts['ui.mode_dual'] }}</button>
     </div>
     <div id="dashboard-mode-status" class="dashboard-tv-mode-status" role="status" aria-live="polite"></div>
+    <a id="summary-page-link" class="dashboard-tv-summary-link" href="/productivity-dashboard-summary">{{ texts['ui.view_summary'] }}</a>
     <button id="reset-device-button" class="dashboard-tv-reset-button" type="button">{{ texts['ui.reset_device'] }}</button>
   </aside>
   <div class="dashboard-tv-live-status" aria-live="polite">
