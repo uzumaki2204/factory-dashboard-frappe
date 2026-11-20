@@ -74,17 +74,6 @@
         return cell;
     }
 
-    function lineDetail(row) {
-        const detail = element('div', 'dashboard-tv-line-detail');
-        detail.append(element('strong', '', row.line_code || row.line_name || row.line));
-        detail.append(element('span', '', row.product_code || t('ui.no_value')));
-        if (Number(row.report_count) > 0 && Number(row.qc_total_quantity) > 0) {
-            detail.append(element('span', '', `${t('ui.defects')}: ${number(row.defect_quantity)}`));
-            detail.append(element('span', '', `${t('ui.defect_rate')}: ${row.has_defect_rate ? percent(row.defect_rate_percent) : t('ui.no_value')}`));
-        }
-        return detail;
-    }
-
     function slotMatrix(rows) {
         const matrix = element('section', 'dashboard-tv-slots');
         const heading = element('div', 'dashboard-tv-slot-heading');
@@ -148,11 +137,6 @@
         kpis.append(kpi(t('ui.current_target'), number(row.current_target_quantity), 'blue'));
         kpis.append(kpi(t('ui.achievement'), percent(row.achievement_rate_percent), 'green'));
         board.append(kpis);
-        if (row.mixed_products) {
-            const details = element('div', 'dashboard-tv-line-details');
-            row.line_details.forEach(detail => details.append(lineDetail(detail)));
-            board.append(details);
-        }
         board.append(slotMatrix(row.time_slots || []));
         return board;
     }

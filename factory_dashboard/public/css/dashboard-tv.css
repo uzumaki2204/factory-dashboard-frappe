@@ -437,23 +437,6 @@ body.dashboard-tv-drawer-open { overflow: hidden !important; }
     text-align: center;
 }
 
-.dashboard-tv-line-details {
-    display: grid;
-    gap: 4px;
-    padding: 7px;
-    border-bottom: 1px solid #d2dcea;
-}
-
-.dashboard-tv-line-detail {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 20px;
-    justify-content: center;
-    padding: 5px;
-    background: #eef4ff;
-    font-weight: 700;
-}
-
 .dashboard-tv-device {
     width: min(480px, calc(100% - 24px));
     margin: auto;

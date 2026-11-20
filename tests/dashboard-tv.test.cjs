@@ -123,24 +123,22 @@ test('TV shows line name, four KPIs and only visible slots', async () => {
     assert.equal(find(board, 'dashboard-tv-slot-time')[0].textContent, '07:30 - 09:30');
 });
 
-test('missing report or QC data has no banner or per-line QC figures', async () => {
+test('mixed group has no missing-data banner or source-line rows', async () => {
     const missing = { ...row, report_count: 0, qc_total_quantity: 0, time_slots: row.time_slots.map(x => ({ ...x, is_visible: false })) };
-    const { nodes } = await render([{ ...missing, mixed_products: true, line_details: [
+    const combined = { ...missing, mixed_products: true, line_details: [
         { ...missing, line_code: '314', qc_total_quantity: 100 },
         { ...missing, line_code: '315', report_count: 1 },
         { ...row, line_code: '316' },
-    ] }]);
-    const board = nodes['dashboard-panels'];
-    assert.equal(find(board, 'dashboard-tv-data-note').length, 0);
-    const details = find(board, 'dashboard-tv-line-detail');
-    assert.equal(details.length, 3);
-    assert.equal(details[0].textContent.includes(texts['ui.defects']), false);
-    assert.equal(details[0].textContent.includes(texts['ui.defect_rate']), false);
-    assert.equal(details[1].textContent.includes(texts['ui.defects']), false);
-    assert.equal(details[1].textContent.includes(texts['ui.defect_rate']), false);
-    assert.equal(details[2].textContent.includes(`${texts['ui.defects']}: 0`), true);
-    assert.equal(details[2].textContent.includes(`${texts['ui.defect_rate']}: 0%`), true);
-    assert.equal(find(board, 'dashboard-tv-empty')[0].textContent, texts['ui.slots_not_started']);
+    ] };
+    const { nodes } = await render([combined], 'dual', { dualLines: [combined, combined] });
+    assert.equal(nodes['dashboard-panels'].children.length, 2);
+    for (const board of nodes['dashboard-panels'].children) {
+        assert.equal(find(board, 'dashboard-tv-data-note').length, 0);
+        assert.equal(find(board, 'dashboard-tv-line-details').length, 0);
+        assert.equal(find(board, 'dashboard-tv-line-detail').length, 0);
+        assert.equal(board.children.length, 3);
+        assert.equal(find(board, 'dashboard-tv-empty')[0].textContent, texts['ui.slots_not_started']);
+    }
 });
 
 test('drawer switches modes locally and remains keyboard accessible', async () => {
