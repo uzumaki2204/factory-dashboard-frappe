@@ -9,6 +9,11 @@
     const form = document.getElementById('dashboard-device-form');
     const params = new URLSearchParams(window.location.search);
     const deviceId = (params.get('device_id') || '').trim();
+    const summaryLink = document.getElementById('summary-page-link');
+    const summaryUrl = new URL('/productivity-dashboard-summary', window.location.origin);
+    if (deviceId) summaryUrl.searchParams.set('device_id', deviceId);
+    summaryUrl.searchParams.set('lang', root.dataset.lang || 'vi');
+    summaryLink.href = summaryUrl.pathname + summaryUrl.search;
     const modeStorageKey = `factoryDashboardMode:${deviceId}`;
     const drawer = document.getElementById('dashboard-device-drawer');
     const backdrop = document.getElementById('dashboard-device-backdrop');
@@ -24,6 +29,7 @@
     let timer;
     let requestSequence = 0;
     let activeDevice = Boolean(deviceId);
+    summaryLink.hidden = !activeDevice;
     let selectedMode = readSavedMode();
     let currentMode = null;
 
@@ -275,6 +281,7 @@
         try { window.localStorage.removeItem('factoryDashboardSession'); } catch (_) { /* Storage is optional. */ }
         selectedMode = null;
         activeDevice = false;
+        summaryLink.hidden = true;
         closeDrawer();
         panelButton.disabled = true;
         currentMode = null;

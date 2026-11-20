@@ -4,6 +4,7 @@ from datetime import date
 import frappe
 from factory_dashboard.i18n import catalog, message
 from factory_dashboard.metrics import line_summary, panel_summary
+from factory_dashboard.summary import build_summary
 from factory_management.device_registry import ready
 from factory_productivity.api import scope_lines
 
@@ -127,6 +128,13 @@ def summary(device_id=None, production_date=None, lines=None):
     mode, refresh_seconds = _settings()
     return {"production_date": day, "defect_rate_mode": mode, "refresh_seconds": refresh_seconds,
             "lines": [line_summary(line, day, mode) for line in lines]}
+
+
+@frappe.whitelist(allow_guest=True, methods=["GET"])
+def productivity_summary(device_id=None, date_from=None, date_to=None,
+                         company_code=None, factory_code=None, product_code=None):
+    _device(device_id)
+    return build_summary(date_from, date_to, company_code, factory_code, product_code)
 
 
 @frappe.whitelist(allow_guest=True, methods=["GET"])

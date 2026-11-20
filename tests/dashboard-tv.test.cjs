@@ -41,7 +41,7 @@ async function render(lines, mode = 'single', options = {}) {
         'device-panel-button', 'device-panel-close', 'dashboard-mode-status',
         'dashboard-mode-single', 'dashboard-mode-dual', 'dashboard-device-name',
         'dashboard-device-code', 'dashboard-device-line', 'dashboard-device-modes',
-        'dashboard-device-id',
+        'dashboard-device-id', 'summary-page-link',
     ];
     const nodes = Object.fromEntries(ids.map(id => [id, new Element(id)]));
     nodes['dashboard-texts'].textContent = JSON.stringify(texts);
@@ -116,6 +116,7 @@ const row = {
 
 test('TV shows line name, four KPIs and only visible slots', async () => {
     const { nodes } = await render([row]);
+    assert.equal(nodes['summary-page-link'].href, '/productivity-dashboard-summary?device_id=fixture&lang=vi');
     const board = nodes['dashboard-panels'];
     assert.equal(find(board, 'dashboard-tv-line-code')[0].textContent, 'C5X3');
     assert.deepEqual(find(board, 'dashboard-tv-kpi-value').map(x => x.textContent), ['519', '0%', '434', '62.2%']);

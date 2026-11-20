@@ -49,7 +49,7 @@ productivity = types.ModuleType('factory_productivity.api')
 productivity.scope_lines = lambda device: ['L1', 'L2']
 sys.modules.setdefault('factory_productivity', types.ModuleType('factory_productivity'))
 sys.modules['factory_productivity.api'] = productivity
-from factory_dashboard import metrics, api
+from factory_dashboard import metrics, api, summary
 from factory_dashboard.factory_dashboard.doctype.productivity_dashboard_device_config.productivity_dashboard_device_config import (
     ProductivityDashboardDeviceConfig,
 )
@@ -381,6 +381,58 @@ class ParityTests(unittest.TestCase):
         self.assertEqual(0,row['finished_quantity'])
         self.assertEqual(0,row['daily_target_quantity'])
         self.assertEqual([],row['time_slots'])
+
+
+class SummaryTests(unittest.TestCase):
+    def setUp(self):
+        frappe.db = MagicMock()
+        frappe.utils = Row(today=lambda: '2026-11-20', now_datetime=lambda: datetime(2026, 11, 20, 15, 0))
+
+    def test_monthly_totals_merge_group_lines_and_keep_all_time_cumulative(self):
+        monthly = [
+            Row(company_id='C', company_code='C', company_name='Company', factory_id='F',
+                factory_code='F', factory_name='Factory', line_id=line, line_code=line,
+                line_name=line, product_id=product, product_code=product, product_name=product,
+                production_date=day, produced_quantity=quantity)
+            for line, product, day, quantity in [
+                ('L1', 'P', '2026-11-17', 80), ('L2', 'P', '2026-11-17', 70),
+                ('L1', 'Q', '2026-11-18', 30),
+            ]
+        ]
+        lifetime = [Row(company_id='C', factory_id='F', line_id='L1', line_code='L1',
+                        product_code='P', produced_quantity=100),
+                    Row(company_id='C', factory_id='F', line_id='L2', line_code='L2',
+                        product_code='P', produced_quantity=150)]
+        with patch.object(summary, '_rows', return_value=monthly), \
+             patch.object(summary, '_lifetime', return_value=lifetime), \
+             patch.object(summary, '_line_labels', return_value={'L1': ('G', 'Group'), 'L2': ('G', 'Group')}):
+            result = summary.build_summary('2026-11-01', '2026-11-30', product_code='P')
+        self.assertEqual(1, len(result['entries']))
+        self.assertEqual((150, 250, 'G'),
+                         (result['entries'][0]['produced_quantity'],
+                          result['entries'][0]['cumulative_produced'],
+                          result['entries'][0]['line_code']))
+        self.assertEqual((150, 250), (result['product_totals'][0]['total_produced'],
+                                      result['product_totals'][0]['cumulative_produced']))
+        self.assertEqual({'P', 'Q'}, {item['code'] for item in result['products']})
+
+    def test_summary_api_requires_approved_device_before_query(self):
+        with patch.object(api, '_device', side_effect=frappe.PermissionError('blocked')), \
+             patch.object(api, 'build_summary') as build:
+            with self.assertRaises(frappe.PermissionError):
+                api.productivity_summary('UNKNOWN')
+            build.assert_not_called()
+
+    def test_summary_rejects_long_range_and_uses_active_reports(self):
+        self.assertEqual(('2026-10-01', '2026-10-20'), summary._period(None, '2026-10-20'))
+        with self.assertRaises(frappe.ValidationError):
+            summary._period('2026-01-01', '2026-03-01')
+        frappe.db.sql.return_value = []
+        summary._rows('2026-11-01', '2026-11-30', {'company_code': '', 'factory_code': '', 'product_code': ''})
+        query = frappe.db.sql.call_args.args[0]
+        self.assertIn('r.is_deleted = 0', query)
+        self.assertIn('tabProductivity Production Plan', query)
+        self.assertIn('SUM(finished_quantity)', query)
 
 
 if __name__ == '__main__':

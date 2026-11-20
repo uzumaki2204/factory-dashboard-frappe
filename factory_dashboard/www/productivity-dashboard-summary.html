@@ -1,0 +1,35 @@
+{% extends "templates/base.html" %}
+{% block head %}{{ include_style('desk.bundle.css') }}<link rel="stylesheet" href="/assets/factory_dashboard/css/dashboard-summary.css?v={{ asset_version }}">{% endblock %}
+{% block navbar %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block content %}
+<main class="summary-page" data-lang="{{ lang }}">
+  <a id="summary-back" class="summary-back" href="/productivity-dashboard-tv" aria-label="{{ texts['ui.back_to_dashboard'] }}">← {{ texts['ui.back_to_dashboard'] }}</a>
+  <div id="summary-status" class="summary-status" role="status" aria-live="polite"></div>
+  <section class="summary-overview" aria-label="{{ texts['ui.summary_page'] }}">
+    <article class="summary-card"><span>{{ texts['ui.summary_total_output'] }}</span><strong id="summary-total">0</strong><small id="summary-generated"></small></article>
+    <article class="summary-card"><span>{{ texts['ui.summary_company_count'] }}</span><strong id="summary-companies">0</strong></article>
+    <article class="summary-card"><span>{{ texts['ui.summary_group_count'] }}</span><strong id="summary-groups">0</strong></article>
+    <article class="summary-card"><span>{{ texts['ui.summary_product_count'] }}</span><strong id="summary-products">0</strong></article>
+  </section>
+  <section class="summary-surface">
+    <div class="summary-toolbar">
+      <div class="summary-month-nav"><button id="summary-prev" type="button">← {{ texts['ui.previous_month'] }}</button><strong id="summary-month-label"></strong><button id="summary-next" type="button">{{ texts['ui.next_month'] }} →</button></div>
+      <label>{{ texts['ui.summary_company'] }}<select id="summary-company"></select></label>
+      <label>{{ texts['ui.summary_factory'] }}<select id="summary-factory"></select></label>
+      <label>{{ texts['ui.product'] }}<select id="summary-product"></select></label>
+      <button id="summary-apply" type="button" class="summary-primary">{{ texts['ui.load_data'] }}</button>
+      <button id="summary-reset" type="button">{{ texts['ui.reset_filters'] }}</button>
+    </div>
+    <div class="summary-main-grid">
+      <div class="summary-calendar-wrap"><h2 id="summary-calendar-title"></h2><div class="summary-weekdays" id="summary-weekdays"></div><div class="summary-calendar" id="summary-calendar"></div></div>
+      <aside class="summary-product-totals"><h2>{{ texts['ui.summary_product_totals'] }}</h2><div class="summary-table-scroll"><table><thead><tr><th>{{ texts['ui.product'] }}</th><th>{{ texts['ui.summary_total_output'] }}</th><th>{{ texts['ui.summary_cumulative'] }}</th></tr></thead><tbody id="summary-product-totals"></tbody></table></div></aside>
+    </div>
+  </section>
+  <section class="summary-surface summary-detail-section"><h2>{{ texts['ui.summary_matrix'] }}</h2><div class="summary-table-scroll"><table><thead id="summary-matrix-head"></thead><tbody id="summary-matrix-body"></tbody></table></div></section>
+  <section class="summary-surface summary-detail-section"><h2>{{ texts['ui.summary_chart'] }}</h2><div id="summary-chart" class="summary-chart"></div></section>
+  <div id="summary-modal" class="summary-modal" hidden><div class="summary-modal-backdrop" data-close="true"></div><section class="summary-modal-content" role="dialog" aria-modal="true" aria-labelledby="summary-modal-title"><header><h2 id="summary-modal-title"></h2><button id="summary-modal-close" type="button" aria-label="{{ texts['ui.close'] }}">×</button></header><div id="summary-modal-stats" class="summary-modal-stats"></div><div class="summary-modal-tables"><section><h3>{{ texts['ui.summary_day_products'] }}</h3><div class="summary-table-scroll"><table><thead><tr><th>{{ texts['ui.product'] }}</th><th>{{ texts['ui.summary_total_output'] }}</th></tr></thead><tbody id="summary-modal-products"></tbody></table></div></section><section><h3>{{ texts['ui.summary_day_companies'] }}</h3><div class="summary-table-scroll"><table><thead><tr><th>{{ texts['ui.summary_company'] }}</th><th>{{ texts['ui.product'] }}</th><th>{{ texts['ui.summary_total_output'] }}</th></tr></thead><tbody id="summary-modal-companies"></tbody></table></div></section></div><section><h3>{{ texts['ui.summary_day_lines'] }}</h3><div class="summary-table-scroll"><table><thead><tr><th>{{ texts['ui.summary_company'] }}</th><th>{{ texts['ui.summary_factory'] }}</th><th>{{ texts['ui.summary_line_group'] }}</th><th>{{ texts['ui.product'] }}</th><th>{{ texts['ui.summary_total_output'] }}</th></tr></thead><tbody id="summary-modal-lines"></tbody></table></div></section></section></div>
+</main>
+<script id="dashboard-texts" type="application/json">{{ texts_json | safe }}</script>
+<script src="/assets/factory_dashboard/js/dashboard-summary.js?v={{ asset_version }}" defer></script>
+{% endblock %}

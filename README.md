@@ -6,6 +6,8 @@ Independent Frappe 16 app for productivity display. Requires `factory_management
 
 On the TV page, the device drawer can switch between Single and Dual when both screen selections are valid. The choice is saved in that browser for the current device and does not change the managed device configuration. Empty report and QC notes are hidden on TV. A combined panel displays its aggregate KPIs and time slots without a separate list of its source lines.
 
+The TV control at the left edge opens `/productivity-dashboard-summary?device_id=<Factory Device name>`. This monthly view shows production KPIs, calendar, product totals, daily matrix, chart and per-day details. Its read-only API requires an approved device and summarizes all companies and factories, as in the .NET Dashboard Summary. Output is the sum of report time-slot quantities; cumulative totals include all historical reports within the selected company, factory and product filters. The page refreshes every five minutes.
+
 ## Install and update
 
 Install the two required apps first. Add this repository to the bench as app `factory_dashboard`, install it on the target site, then run `bench --site <site> migrate` and `bench build --app factory_dashboard`. Pilot should pull the `version-16` branch and run migrate and build on updates. Post-model-sync patches create the `GLOBAL` settings record, replace retired source modes with `qc_input`, migrate legacy device selections into Left and Right Screen, and refresh the two-selector device form. Installation does not import historical data.
